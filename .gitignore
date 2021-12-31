@@ -1,2 +1,6 @@
 pip3 install --upgrade -e git+https://github.com/twintproject/twint.git@origin/master#egg=twint
 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
+
+twint+token.txt
+__pycache__
+.idea
