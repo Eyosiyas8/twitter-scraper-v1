@@ -1,27 +1,30 @@
-import csv
 import json
 from elasticsearch import Elasticsearch, helpers
-
-import os
-
+from profile_scraper import *
+from tweet_scraper import *
 from time import sleep
 import tqdm
 from pymongo import MongoClient
-client = MongoClient('mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false')
-db = client['twitter-data']
-collection = db['twitter']
 
+# Initializing mongo db client
+db_connection = os.environ.get('DB_CONNECTION')
+db_client = os.environ.get('DB_CLIENT')
+db_collection = os.environ.get('DB_COLLECTION')
+client = MongoClient(db_connection)
+print(db_connection)
+db = client[db_client]
+collection = db[db_collection]
 
-from profile_scraper import *
-from tweet_scraper import *
-
+# Initializing different variables
 tweet_ids = set()
 csv_row1 = []
 data = []
 es = Elasticsearch()
 
+# Generates the sentiment for a given tweet
+key_word = os.environ.get('KEY_WORDS')
 def sentiment_output(tweet):
-    with open("/home/osint/Desktop/OSINT/Twitter/twitterScraper/Authentication/words.txt", "r",
+    with open(key_word, "r",
               encoding='utf-8') as file:
         lines = file.readlines()
         lines = [line.rstrip() for line in lines]
@@ -46,6 +49,7 @@ def sentiment_output(tweet):
 
     return sentiment
 
+# Structuring the data generated from the csv files to be inserted to the database
 def data_structure():
     with open(csv_file, 'r', encoding='utf-8') as f1, open(csv_file2, 'r', encoding='utf-8') as f2, open(csv_file3, 'r', encoding='utf-8') as f3:
         reader1 = csv.DictReader(f1)
@@ -122,22 +126,24 @@ def data_structure():
     collection.insert(csv_row1)
     print(csv_row1)
 
-with open("/home/osint/Desktop/OSINT/Twitter/twitterScraper/Authentication/Document.txt","r", encoding='utf-8') as file:
+# Initialize the scraping process
+acc_name= os.environ.get('ACC_NAME')
+with open(acc_name, "r", encoding='utf-8') as file:
     lines = file.readlines()
     lines = [line.rstrip() for line in lines]
     for i in tqdm.tqdm(range(len(lines))):
-        sleep(1)
-        print(((i+1)/(len(lines)))*100, '%')
-        username=lines[i]
+        sleep(0.1)
+        username = lines[i]
         url = "https://twitter.com/%s" % username
         print("current session is {}".format(driver.session_id))
         driver.get(url)
         print(url)
         profile_scraper(username)
-        csv_file = "/home/osint/Desktop/OSINT/Twitter/twitterScraper/csv_files/" + username + ".csv"
-        csv_file1 = "/home/osint/Desktop/OSINT/Twitter/twitterScraper/csv_files/raw_dump_" + username + ".csv"
-        csv_file2 = "/home/osint/Desktop/OSINT/Twitter/twitterScraper/csv_files/parent_tweet_" + username + ".csv"
-        csv_file3 = "/home/osint/Desktop/OSINT/Twitter/twitterScraper/csv_files/reply_to_" + username + ".csv"
+        csv_file = (os.environ.get('csvFile')+ username + ".csv")
+        print(csv_file)
+        csv_file1 = os.environ.get('csvFile1')
+        csv_file2 = os.environ.get('csvFile2')
+        csv_file3 = os.environ.get('csvFile3')
         try:
             os.remove(csv_file1)
             os.remove(csv_file2)
@@ -145,16 +151,21 @@ with open("/home/osint/Desktop/OSINT/Twitter/twitterScraper/Authentication/Docum
         except:
             print('No Such File!')
         scrapper(username, csv_file1)
-        filter_username(username, csv_file1, csv_file2)
-        filter_replies(username, csv_file1, csv_file3)
-        sleep(2)
-        data_structure()
+        try:
+            filter_username(username, csv_file1, csv_file2)
+            filter_replies(username, csv_file1, csv_file3)
+            sleep(2)
+            data_structure()
+        except Exception as e:
+            print(colored(255, 100, 50, e))
+            continue
         sleep(1)
 driver.close()
-out_file = open("file.json", "w", encoding='utf-8')
+
+'''out_file = open("file.json", "w", encoding='utf-8')
 
 json.dump(csv_row1, out_file, indent=6)
 
-out_file.close()
+out_file.close()'''
 
 time.sleep(5)

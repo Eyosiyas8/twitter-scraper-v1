@@ -1,27 +1,22 @@
-import parawrap
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.keys import Keys
-from lxml import etree
-from pandas import *
+import os
 import pandas as pd
-import twint
 import time
-#from bs4 import BeautifulSoup
-from elasticsearch import Elasticsearch
-import csv
-from selenium.common.exceptions import NoSuchElementException
 
 options = Options()
 options.headless = True
-driver = webdriver.Chrome(options=options, executable_path=r"/home/osint/Desktop/OSINT/Twitter/twitterScraper/chromedriver/chromedriver")
+chro_path = os.environ.get('CHROME_PATH')
+driver = webdriver.Chrome(options=options, executable_path=chro_path)
 
 data_set = []
 # print(search_page)
 # open("twitterpage.text","w").write(search_page.encode('utf-8'))
+
+# Profile scraper
 def profile_scraper(username):
     try:
         wait = WebDriverWait(driver, 5)
@@ -90,8 +85,9 @@ def profile_scraper(username):
         [[Fullname, UserName, Description, Tweets, No_Following, No_Followers, Joined_date]],
         columns=['Fullname', 'UserName', 'Description', 'Tweets', 'Number of Followings', 'Number of Followers',
                  'Joined_date'])
-
-    df.to_csv('/home/osint/Desktop/OSINT/Twitter/twitterScraper/csv_files/' + username + '.csv')
+    
+    file = os.environ.get('csvFile')
+    df.to_csv(file + username + '.csv')
 
 '''
 with open("C:/Users/User/PycharmProjects/twitterScraper/venv/Scripts/Authentication/Document.txt","r", encoding='utf-8') as file:
