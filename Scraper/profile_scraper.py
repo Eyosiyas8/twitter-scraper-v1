@@ -10,7 +10,7 @@ import time
 options = Options()
 options.headless = True
 chro_path = os.environ.get('CHROME_PATH')
-driver = webdriver.Chrome(options=options, executable_path=chro_path)
+driver = webdriver.Chrome(executable_path=chro_path)
 
 data_set = []
 # print(search_page)

@@ -4,19 +4,15 @@ import  csv
 import os
 import sys
 dependancies = os.environ.get('DEPENDANCIES')
+print(dependancies)
 sys.path.insert(1, dependancies)
 from color import colored
-proxyHost = ['37.59.203.131', '58.234.116.197', '195.158.14.118', '138.68.60.8', '178.18.245.74', '117.20.216.218', '103.149.162.194', '206.253.164.122']
-proxyPort = ['1080', '8193', '3128', '8080', '8888', '8080', '80', '80']
 def scrapper(username, csv_file):
     # Configure
-    rand = random.randrange(0,7)
     c = twint.Config()
-    #c.Proxy_host = proxyHost[rand]
-    #c.Proxy_port = proxyPort[rand]
-    #c.Proxy_type = "http"    
     c.Username = username
     c.Store_csv = True
+    c.Since = '2022-02-08'
     c.Output = csv_file
 
     # Run
@@ -28,10 +24,8 @@ def scrapper(username, csv_file):
     
     # Configure
     n = twint.Config()
-    #n.Proxy_host = "92.204.251.195"
-    #n.Proxy_port = "1080"
-    #n.Proxy_type = "http"
     n.Search = "@" + username
+    n.Since = '2022-02-08'
     n.Replies = True
     n.Store_csv = True
     n.Output = csv_file
