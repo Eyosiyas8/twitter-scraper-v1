@@ -5,7 +5,7 @@ import os
 import sys
 dependancies = os.environ.get('DEPENDANCIES')
 print(dependancies)
-sys.path.insert(1, dependancies)
+sys.path.insert(1, '/home/ubuntu/Desktop/OSINT/Twitter/twitterScraper/Dependancies')
 from color import colored
 def scrapper(username, csv_file):
     # Configure

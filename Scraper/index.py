@@ -10,10 +10,10 @@ from datetime import datetime
 db_connection = os.environ.get('DB_CONNECTION')
 db_client = os.environ.get('DB_CLIENT')
 db_collection = os.environ.get('DB_COLLECTION')
-client = MongoClient(db_connection)
+client = MongoClient('mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false')
 print(db_connection)
-db = client[db_client]
-collection = db[db_collection]
+db = client['twitter-data']
+collection = db['twitter']
 
 # Initializing different variables
 tweet_ids = set()
@@ -22,7 +22,7 @@ data = []
 es = Elasticsearch()
 
 # Generates the sentiment for a given tweet
-key_word = os.environ.get('KEY_WORDS')
+key_word = os.environ.get('/home/ubuntu/Desktop/OSINT/Twitter/twitterScraper/Authentication/words.txt')
 
 
 def sentiment_output(tweet):
@@ -134,7 +134,7 @@ def data_structure(csv_file, csv_file2, csv_file3):
 
 # Initialize the scraping process
 acc_name = os.environ.get('ACC_NAME')
-with open(acc_name, "r", encoding='utf-8') as file:
+with open('/home/ubuntu/Desktop/OSINT/Twitter/twitterScraper/Authentication/Document.txt', "r", encoding='utf-8') as file:
     lines = file.readlines()
     lines = [line.rstrip() for line in lines]
     for i in tqdm.tqdm(range(len(lines))):
@@ -145,11 +145,11 @@ with open(acc_name, "r", encoding='utf-8') as file:
         driver.get(url)
         print(url)
         profile_scraper(username)
-        csv_file = os.environ.get('csvFile') + username + ".csv"
+        csv_file = '/home/ubuntu/Desktop/OSINT/Twitter/twitterScraper/csv_files/' + username + ".csv"
         print(csv_file)
-        csv_file1 = os.environ.get('csvFile1') + username + ".csv"
-        csv_file2 = os.environ.get('csvFile2') + username + ".csv"
-        csv_file3 = os.environ.get('csvFile3') + username + ".csv"
+        csv_file1 = '/home/ubuntu/Desktop/OSINT/Twitter/twitterScraper/csv_files/raw_dump_' + username + ".csv"
+        csv_file2 = '/home/ubuntu/Desktop/OSINT/Twitter/twitterScraper/csv_files/parent_tweet_' + username + ".csv"
+        csv_file3 = '/home/ubuntu/Desktop/OSINT/Twitter/twitterScraper/csv_files/reply_to_' + username + ".csv"
         try:
             os.remove(csv_file1)
             os.remove(csv_file2)
