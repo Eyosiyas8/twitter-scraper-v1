@@ -1,19 +1,55 @@
 import twint
 import random
-import  csv
+import csv
 import os
 import sys
+import welcome
 dependancies = os.environ.get('DEPENDANCIES')
 print(dependancies)
-sys.path.insert(1, '/home/ubuntu/Desktop/OSINT/Twitter/twitterScraper/Dependancies')
+sys.path.insert(1, dependancies)
 from color import colored
+
+"""
+Keyword = input("input the keyword you want to search by: ")
+keywordAppend = input("Do you want to append this keyword permanently to the file of you want to use it temporariy? p/t: ")
+if keywordAppend == 't':
+    print(keywordAppend)
+elif keywordAppend == 'p':
+    f=open('file.csv', 'a', encoding='utf-8')
+    f.write(Keyword)
+    print(keywordAppend)
+else:
+    print("Invalid Entry! Please try again! Thanks for using the scraper! :):)")
+since = input("Do you wanna select from when you want to search? y/n: ")
+until = input("Do you wanna select until when you want to search? y/n: ")
+if until == 'n':
+    until = None
+    print(until)
+elif until == 'y':
+    until = input("Enter the date you want to scrape until (use yyyy-mm-dd format): ")
+    print(until)
+else:
+    print("Invalid Entry! Please try again! Thanks for using the scraper! ")
+
+if since == 'n':
+    since = None
+    print(since)
+elif since == 'y':
+    since = input("Enter the date you want to scrape since (use yyyy-mm-dd format): ")
+    print(since)
+else:
+    print("Invalid Entry! Please try again! Thanks for using the scraper! ")
+"""
 def scrapper(username, csv_file):
     # Configure
     c = twint.Config()
     c.Username = username
     c.Store_csv = True
-    c.Since = '2022-02-08'
+    #c.Since = since
+    #c.Until = until
     c.Output = csv_file
+    #c.Search = Keyword
+    #c.Verified = True 
 
     # Run
     try:
@@ -25,8 +61,10 @@ def scrapper(username, csv_file):
     # Configure
     n = twint.Config()
     n.Search = "@" + username
-    n.Since = '2022-02-08'
     n.Replies = True
+    #n.Since = since
+    #n.Until = until
+    n.To = username
     n.Store_csv = True
     n.Output = csv_file
     # Run
