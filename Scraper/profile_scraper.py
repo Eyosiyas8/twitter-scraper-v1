@@ -10,7 +10,7 @@ import time
 options = Options()
 options.headless = True
 chro_path = os.environ.get('CHROME_PATH')
-driver = webdriver.Chrome(options=options, executable_path='/home/ubuntu/Desktop/OSINT/Twitter/twitterScraper/chromedriver/chromedriver')
+driver = webdriver.Chrome(options=options, executable_path=chro_path)
 
 data_set = []
 # print(search_page)
@@ -87,7 +87,7 @@ def profile_scraper(username):
                  'Joined_date'])
     
     file = os.environ.get('csvFile')
-    df.to_csv('/home/ubuntu/Desktop/OSINT/Twitter/twitterScraper/csv_files/' + username + '.csv')
+    df.to_csv(file + username + '.csv')
 
 '''
 with open("C:/Users/User/PycharmProjects/twitterScraper/venv/Scripts/Authentication/Document.txt","r", encoding='utf-8') as file:
