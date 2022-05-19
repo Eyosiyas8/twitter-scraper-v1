@@ -10,10 +10,10 @@ from datetime import datetime
 db_connection = os.environ.get('DB_CONNECTION')
 db_client = os.environ.get('DB_CLIENT')
 db_collection = os.environ.get('DB_COLLECTION')
-client = MongoClient('mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false')
+client = MongoClient(db_connection)
 print(db_connection)
-db = client['twitter-data']
-collection = db['twitter']
+db = client[db_client]
+collection = db[db_collection]
 
 # Initializing different variables
 tweet_ids = set()
@@ -22,7 +22,7 @@ data = []
 es = Elasticsearch()
 
 # Generates the sentiment for a given tweet
-key_word = os.environ.get('/home/ubuntu/Desktop/OSINT/Twitter/twitterScraper/Authentication/words.txt')
+key_word = os.environ.get('KEY_WORDS')
 
 
 def sentiment_output(tweet):
@@ -134,7 +134,7 @@ def data_structure(csv_file, csv_file2, csv_file3):
 
 # Initialize the scraping process
 acc_name = os.environ.get('ACC_NAME')
-with open('/home/ubuntu/Desktop/OSINT/Twitter/twitterScraper/Authentication/Document.txt', "r", encoding='utf-8') as file:
+with open(acc_name, "r", encoding='utf-8') as file:
     lines = file.readlines()
     lines = [line.rstrip() for line in lines]
     for i in tqdm.tqdm(range(len(lines))):
@@ -145,11 +145,11 @@ with open('/home/ubuntu/Desktop/OSINT/Twitter/twitterScraper/Authentication/Docu
         driver.get(url)
         print(url)
         profile_scraper(username)
-        csv_file = '/home/ubuntu/Desktop/OSINT/Twitter/twitterScraper/csv_files/' + username + ".csv"
+        csv_file = os.environ.get('csvFile') + username + ".csv"
         print(csv_file)
-        csv_file1 = '/home/ubuntu/Desktop/OSINT/Twitter/twitterScraper/csv_files/raw_dump_' + username + ".csv"
-        csv_file2 = '/home/ubuntu/Desktop/OSINT/Twitter/twitterScraper/csv_files/parent_tweet_' + username + ".csv"
-        csv_file3 = '/home/ubuntu/Desktop/OSINT/Twitter/twitterScraper/csv_files/reply_to_' + username + ".csv"
+        csv_file1 = os.environ.get('csvFile1') + username + ".csv"
+        csv_file2 = os.environ.get('csvFile2') + username + ".csv"
+        csv_file3 = os.environ.get('csvFile3') + username + ".csv"
         try:
             os.remove(csv_file1)
             os.remove(csv_file2)
@@ -159,6 +159,16 @@ with open('/home/ubuntu/Desktop/OSINT/Twitter/twitterScraper/Authentication/Docu
         scrapper(username, csv_file1)
         try:
             filter_username(username, csv_file1, csv_file2)
+            f=open(csv_file2, 'r+', encoding='utf-8')
+            reader = csv.DictReader(f)
+            lines=len(list(reader))
+            while lines < 10:
+                filter_username(username, csv_file1, csv_file2)
+                f=open(csv_file2, 'r+', encoding='utf-8')
+                reader = csv.DictReader(f)
+                lines=len(list(reader))
+                f.close()
+
             filter_replies(username, csv_file1, csv_file3)
             sleep(2)
             data_structure(csv_file, csv_file2, csv_file3)
