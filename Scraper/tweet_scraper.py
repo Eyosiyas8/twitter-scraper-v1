@@ -3,11 +3,12 @@ import random
 import csv
 import os
 import sys
-import welcome
+#import welcome
 dependancies = os.environ.get('DEPENDANCIES')
 print(dependancies)
 sys.path.insert(1, dependancies)
-from color import colored
+import colored
+from colored import stylize
 
 """
 Keyword = input("input the keyword you want to search by: ")
@@ -53,10 +54,10 @@ def scrapper(username, csv_file):
 
     # Run
     try:
-        colored(255, 150, 50, (twint.run.Search(c)))
+        stylize(twint.run.Search(c), colored.fg("green"))
     except Exception as e:
-        print(colored(255, 200, 100, 'Scraping for ' + username + '\'s account has failed '))
-        print(colored(255, 100, 100, e))
+        stylize('Scraping for ' + username + '\'s account has failed ', colored.fg("red"))
+        stylize(e, colored.fg("grey_46"))
     
     # Configure
     n = twint.Config()
@@ -69,10 +70,10 @@ def scrapper(username, csv_file):
     n.Output = csv_file
     # Run
     try:
-        colored(255, 50, 150, (twint.run.Search(n)))
+        stylize(twint.run.Search(n), colored.fg("green"))
     except Exception as e:
-        print(colored(255, 200, 100, '\nScraping for replies to ' + username + ' has failed'))
-        print(colored(255, 100, 100, e))
+        stylize('Scraping for replies to ' + username + '\'s account has failed ', colored.fg("red"))
+        stylize(e, colored.fg("grey_46"))
 
 # Filter the original tweet from the raw_dump file
 def filter_username(username, csv_file, csv_file1):

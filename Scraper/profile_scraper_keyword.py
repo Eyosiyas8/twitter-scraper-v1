@@ -6,11 +6,17 @@ from selenium.webdriver.chrome.options import Options
 import os
 import pandas as pd
 import time
+from sys import platform
+basedir = os.path.dirname(os.path.abspath(__file__))
+
+if platform == "linux" or platform == "linux2":
+    chro_path = os.path.join(basedir, '../chromedriver/chromedriver')
+elif platform == "win32":
+    chro_path = os.path.join(basedir, '../chromedriver/chromedriver.exe')
 
 options = Options()
 options.headless = True
-basedir = os.path.dirname(os.path.abspath(__file__))
-chro_path = os.path.join(basedir, '../chromedriver/chromedriver.exe')
+
 driver = webdriver.Chrome(executable_path=chro_path)
 
 data_set = []

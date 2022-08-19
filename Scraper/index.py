@@ -1,4 +1,4 @@
-from elasticsearch import Elasticsearch, helpers
+#from elasticsearch import Elasticsearch, helpers
 from profile_scraper import *
 from tweet_scraper import *
 from time import sleep
@@ -20,7 +20,7 @@ collection = db[db_collection]
 tweet_ids = set()
 csv_row1 = []
 data = []
-es = Elasticsearch()
+#es = Elasticsearch()
 
 # Generates the sentiment for a given tweet
 key_word = os.path.join(basedir, '../Authentication/words.txt')
@@ -134,7 +134,7 @@ def data_structure(csv_file, csv_file2, csv_file3):
 
 
 # Initialize the scraping process
-acc_name = os.environ.get('ACC_NAME')
+acc_name = os.path.join(basedir, '../Authentication/Document.txt')
 with open(acc_name, "r", encoding='utf-8') as file:
     lines = file.readlines()
     lines = [line.rstrip() for line in lines]
@@ -145,8 +145,8 @@ with open(acc_name, "r", encoding='utf-8') as file:
         print("current session is {}".format(driver.session_id))
         driver.get(url)
         print(url)
-        profile_scraper(username)
         csv_file = os.path.join(basedir, '../csv_files/') + username + ".csv"
+        profile_scraper(username, csv_file)
         print(csv_file)
         csv_file1 = os.path.join(basedir, '../csv_files/raw_dump_') + username + ".csv"
         csv_file2 = os.path.join(basedir, '../csv_files/parent_tweet_') + username + ".csv"
