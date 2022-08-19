@@ -17,7 +17,6 @@ elif platform == "win32":
 options = Options()
 options.headless = True
 
-chro_path = os.path.join(basedir, '../chromedriver/chromedriver.exe')
 driver = webdriver.Chrome(options=options, executable_path=chro_path)
 
 data_set = []

@@ -24,7 +24,7 @@ collection = db[db_collection]
 tweet_ids = set()
 csv_row1 = []
 data = []
-es = Elasticsearch()
+es=Elasticsearch([{'host':'localhost:9200','port':9200,'scheme':"http"}])
 
 # Generates the sentiment for a given tweet
 key_word = csvfile1 = os.path.join(basedir, '../Authentication/words.txt')

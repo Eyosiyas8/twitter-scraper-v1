@@ -20,7 +20,7 @@ collection = db[db_collection]
 tweet_ids = set()
 csv_row1 = []
 data = []
-es = Elasticsearch()
+es=Elasticsearch([{'host':'localhost:9200','port':9200,'scheme':"http"}])
 
 # Generates the sentiment for a given tweet
 key_word = os.path.join(basedir, '../Authentication/words.txt')
@@ -178,7 +178,7 @@ with open(acc_name, "r", encoding='utf-8') as file:
             sleep(2)
             data_structure(csv_file, csv_file2, csv_file3)
         except Exception as e:
-            print(colored(255, 100, 50, e))
+            stylize(e, colored.fg("grey_46"))
             continue
         sleep(1)
 driver.close()
