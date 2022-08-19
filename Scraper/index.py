@@ -1,4 +1,4 @@
-#from elasticsearch import Elasticsearch, helpers
+from elasticsearch import Elasticsearch, helpers
 from profile_scraper import *
 from tweet_scraper import *
 from time import sleep
@@ -20,7 +20,7 @@ collection = db[db_collection]
 tweet_ids = set()
 csv_row1 = []
 data = []
-#es = Elasticsearch()
+es = Elasticsearch()
 
 # Generates the sentiment for a given tweet
 key_word = os.path.join(basedir, '../Authentication/words.txt')
@@ -128,7 +128,11 @@ def data_structure(csv_file, csv_file2, csv_file3):
                 'tweets': csv_rows})
             print('almost')
 
-
+    with open(csv_file2, encoding='utf-8') as file1, open(csv_file3, encoding='utf-8') as file2:
+        read1 = csv.DictReader(file1)
+        read2 = csv.DictReader(file2)
+        helpers.bulk(es, read1, index="twitter")
+        helpers.bulk(es, read2, index="twitter")
     collection.insert_many(csv_row1)
     print(csv_row1)
 

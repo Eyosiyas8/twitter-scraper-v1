@@ -1,4 +1,4 @@
-#from elasticsearch import Elasticsearch, helpers
+from elasticsearch import Elasticsearch, helpers
 from ast import keyword
 from pickle import TRUE
 from profile_scraper_keyword import *
@@ -24,7 +24,7 @@ collection = db[db_collection]
 tweet_ids = set()
 csv_row1 = []
 data = []
-#es = Elasticsearch()
+es = Elasticsearch()
 
 # Generates the sentiment for a given tweet
 key_word = csvfile1 = os.path.join(basedir, '../Authentication/words.txt')
@@ -135,7 +135,9 @@ def data_structure_no_reply(csv_profie, csv_keyword1):
                 'tweets': csv_rows})
             print('almost')
 
-
+    with open(csv_keyword1, encoding='utf-8') as file1:
+        read1 = csv.DictReader(file1)
+        helpers.bulk(es, read1, index="twitter_keyword")
     collection.insert_many(csv_row1)
     #print(csv_row1)
     
@@ -217,7 +219,11 @@ def data_structure(csv_profile, csv_keyword1, csv_reply):
                 'tweets': csv_rows})
             print('almost')
 
-
+    with open(csv_keyword1, encoding='utf-8') as file1, open(csv_reply, encoding='utf-8') as file2:
+        read1 = csv.DictReader(file1)
+        read2 = csv.DictReader(file2)
+        helpers.bulk(es, read1, index="twitter_keyword")
+        helpers.bulk(es, read2, index="twitter_keyword")
     collection.insert_many(csv_row1)
 
 # Initialize the scraping process
