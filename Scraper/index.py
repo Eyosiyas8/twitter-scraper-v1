@@ -6,10 +6,11 @@ import tqdm
 from pymongo import MongoClient
 from datetime import datetime
 
+basedir = os.path.dirname(os.path.abspath(__file__))
 # Initializing mongo db client
 db_connection = os.environ.get('DB_CONNECTION')
-db_client = os.environ.get('DB_CLIENT')
-db_collection = os.environ.get('DB_COLLECTION')
+db_client = 'twitter_data'
+db_collection = 'twitter'
 client = MongoClient(db_connection)
 print(db_connection)
 db = client[db_client]
@@ -22,7 +23,7 @@ data = []
 es = Elasticsearch()
 
 # Generates the sentiment for a given tweet
-key_word = os.environ.get('KEY_WORDS')
+key_word = os.path.join(basedir, '../Authentication/words.txt')
 
 
 def sentiment_output(tweet):
@@ -145,11 +146,11 @@ with open(acc_name, "r", encoding='utf-8') as file:
         driver.get(url)
         print(url)
         profile_scraper(username)
-        csv_file = os.environ.get('csvFile') + username + ".csv"
+        csv_file = os.path.join(basedir, '../csv_files/') + username + ".csv"
         print(csv_file)
-        csv_file1 = os.environ.get('csvFile1') + username + ".csv"
-        csv_file2 = os.environ.get('csvFile2') + username + ".csv"
-        csv_file3 = os.environ.get('csvFile3') + username + ".csv"
+        csv_file1 = os.path.join(basedir, '../csv_files/raw_dump_') + username + ".csv"
+        csv_file2 = os.path.join(basedir, '../csv_files/parent_tweet_') + username + ".csv"
+        csv_file3 = os.path.join(basedir, '../csv_files/reply_of_') + username + ".csv"
         try:
             os.remove(csv_file1)
             os.remove(csv_file2)

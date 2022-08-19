@@ -11,10 +11,8 @@ __pycache__
 __pycache__/
 src/
 csv_files/
-Authentication/
-chromedriver/
 Scraper/new.py
 test.txt
 Dependancies/env_var.py
-Authentication/Document.text
+Authentication/
 >>>>>>> d18517b382f768b30bbd03bd618110c1e62663b1
