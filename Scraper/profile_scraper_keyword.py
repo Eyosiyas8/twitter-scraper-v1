@@ -17,7 +17,7 @@ elif platform == "win32":
 options = Options()
 options.headless = True
 
-driver = webdriver.Chrome(executable_path=chro_path)
+driver = webdriver.Chrome(options=options, executable_path=chro_path)
 
 data_set = []
 # print(search_page)

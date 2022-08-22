@@ -128,14 +128,18 @@ def data_structure(csv_file, csv_file2, csv_file3):
                 'tweets': csv_rows})
             print('almost')
 
-    with open(csv_file2, encoding='utf-8') as file1, open(csv_file3, encoding='utf-8') as file2:
-        read1 = csv.DictReader(file1)
-        read2 = csv.DictReader(file2)
-        helpers.bulk(es, read1, index="twitter")
-        helpers.bulk(es, read2, index="twitter")
-    collection.insert_many(csv_row1)
-    print(csv_row1)
-
+    try:
+        with open(csv_file2, encoding='utf-8') as file1, open(csv_file3, encoding='utf-8') as file2:
+            read1 = csv.DictReader(file1)
+            read2 = csv.DictReader(file2)
+            helpers.bulk(es, read1, index="twitter")
+            helpers.bulk(es, read2, index="twitter")
+        collection.insert_many(csv_row1)
+        print(csv_row1)
+    except:
+        print(e, "couldn't connect to elasticsearch!")
+        collection.insert_many(csv_row1)
+        print(csv_row1)
 
 # Initialize the scraping process
 acc_name = os.path.join(basedir, '../Authentication/Document.txt')
