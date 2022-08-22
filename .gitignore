@@ -12,7 +12,9 @@ __pycache__/
 src/
 csv_files/
 Scraper/new.py
+Scraper/dicktionary.txt
 test.txt
 Dependancies/env_var.py
 Authentication/
+chromedriver/
 >>>>>>> d18517b382f768b30bbd03bd618110c1e62663b1
