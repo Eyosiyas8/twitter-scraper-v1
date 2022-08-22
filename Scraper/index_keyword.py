@@ -140,7 +140,7 @@ def data_structure_no_reply(csv_profie, csv_keyword1):
             read1 = csv.DictReader(file1)
             helpers.bulk(es, read1, index="twitter_keyword")
         collection.insert_many(csv_row1)
-    except:
+    except Exception as e:
         print(e, "couldn't connect to elasticsearch!")
         collection.insert_many(csv_row1)
         print(csv_row1)
@@ -232,7 +232,7 @@ def data_structure(csv_profile, csv_keyword1, csv_reply):
             helpers.bulk(es, read2, index="twitter-keyword")
         collection.insert_many(csv_row1)
         print(csv_row1)
-    except:
+    except Exception as e:
         print(e, "couldn't connect to elasticsearch!")
         collection.insert_many(csv_row1)
         print(csv_row1)

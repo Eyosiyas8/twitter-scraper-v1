@@ -136,7 +136,7 @@ def data_structure(csv_file, csv_file2, csv_file3):
             helpers.bulk(es, read2, index="twitter")
         collection.insert_many(csv_row1)
         print(csv_row1)
-    except:
+    except Exception as e:
         print(e, "couldn't connect to elasticsearch!")
         collection.insert_many(csv_row1)
         print(csv_row1)
