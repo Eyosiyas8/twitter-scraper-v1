@@ -3,21 +3,24 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+import chromedriver_autoinstaller
 import os
 import pandas as pd
 import time
 from sys import platform
 basedir = os.path.dirname(os.path.abspath(__file__))
-
+"""
 if platform == "linux" or platform == "linux2":
     chro_path = os.path.join(basedir, '../chromedriver/chromedriver')
 elif platform == "win32":
     chro_path = os.path.join(basedir, '../chromedriver/chromedriver.exe')
+"""
 
+chromedriver_autoinstaller.install()
 options = Options()
 options.headless = True
 
-driver = webdriver.Chrome(options=options, executable_path=chro_path)
+driver = webdriver.Chrome(options=options)
 
 data_set = []
 # print(search_page)

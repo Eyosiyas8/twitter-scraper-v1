@@ -5,7 +5,7 @@ The scraper uses both mongodb and elasticsearch as a backend (i.e. it uses mongo
 
 ### Installation Files (all-in-one)
 
-pip3 install elasticsearch tqdm pymongo parawrap selenium lxml pandas twint colored apscheduler
+pip3 install elasticsearch tqdm pymongo parawrap selenium lxml pandas twint colored apscheduler chromedriver-autoinstaller
 
 ### About Chromedriver
 
