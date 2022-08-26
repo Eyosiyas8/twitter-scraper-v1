@@ -5,17 +5,14 @@ The scraper uses both mongodb and elasticsearch as a backend (i.e. it uses mongo
 
 ### Installation Files (all-in-one)
 
-pip3 install elasticsearch tqdm pymongo parawrap selenium lxml pandas twint colored apscheduler chromedriver-autoinstaller
+pip3 install elasticsearch tqdm pymongo parawrap selenium lxml pandas colored apscheduler chromedriver-autoinstaller
+pip3 install --upgrade -e git+https://github.com/twintproject/twint.git@origin/master#egg=twint
 
 ### About Chromedriver
 
 Make sure the chrome webdriver is the same version with your chrome browser
 - open google chrome and paste chrome://settings/help 
 - search for a chrome webdriver with that specific version number
-
-### For Problematic twint
-
-pip3 install --upgrade -e git+https://github.com/twintproject/twint.git@origin/master#egg=twint
 
 ### For more information on twint
 

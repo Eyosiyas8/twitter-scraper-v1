@@ -1,7 +1,4 @@
 <<<<<<< HEAD
-pip3 install --upgrade -e git+https://github.com/twintproject/twint.git@origin/master#egg=twint
-weboghp_611xMvENFI0DtfaSGvAB7CSM1dX8L32s
-
 twint+token.txt
 post-report/twitter-reporting-ids.txt
 post-report/twitter-reporting-ids.csv
