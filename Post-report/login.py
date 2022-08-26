@@ -10,14 +10,15 @@ from selenium.webdriver.common.keys import Keys
 
 import time
 #from bs4 import BeautifulSoup
-
+import chromedriver_autoinstaller
 from selenium.common.exceptions import NoSuchElementException
 # Assigning a link to a webdriver
 
+chromedriver_autoinstaller.install()
 options = Options()
 options.headless = True
 chro_path = os.environ.get('CHROME_PATH')
-driver = webdriver.Chrome(options=options, executable_path=chro_path)
+driver = webdriver.Chrome(options=options)
 
 driver.get("https://www.twitter.com/login")
 print(driver.current_url)
