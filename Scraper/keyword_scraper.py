@@ -43,13 +43,13 @@ else:
     print("Invalid Entry! Please try again! Thanks for using the scraper! ")
 """
 
-def scraper(Keyword, csv_keyword):
+def scraper(Keyword, csv_keyword, since, until):
     # Configure
     c = twint.Config()
     #c.Username = username
     c.Store_csv = True
-    #c.Since = "2022-08-04"
-    #c.Until = until
+    c.Since = since
+    c.Until = until
     c.Output = csv_keyword
     c.Search = Keyword
     c.Limit = 1
