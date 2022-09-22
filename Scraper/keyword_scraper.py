@@ -52,7 +52,7 @@ def scraper(Keyword, csv_keyword, since, until):
     c.Until = until
     c.Output = csv_keyword
     c.Search = Keyword
-    c.Limit = 1
+    #c.Limit = 1
     #c.Verified = True 
 
     # Run

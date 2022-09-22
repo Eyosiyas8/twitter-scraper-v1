@@ -76,9 +76,11 @@ def data_structure(csv_file, csv_file2, csv_file3):
                 row2['conversation_id'] = row2['conversation_id']
                 row2['username'] = row2['username']
                 row2['name'] = row2['name']
+                row2['date'] = row2['date']
                 row2['tweet'] = row2['tweet']
                 row2['mentions'] = row2['mentions']
                 row2['photos'] = row2['photos']
+                row2['external_link'] = row2['external_link']
                 row2['replies_count'] = row2['replies_count']
                 row2['retweets_count'] = row2['retweets_count']
                 row2['likes_count'] = row2['likes_count']
@@ -92,9 +94,11 @@ def data_structure(csv_file, csv_file2, csv_file3):
                             'conversation_id': row3['conversation_id'],
                             'username': row3['username'],
                             'name': row3['name'],
+                            'date': row3['date'],
                             'reply': row3['tweet'],
                             'mentions': row3['mentions'],
                             'photos': row3['photos'],
+                            'external_link': row3['external_link'],
                             'replies_count': row3['replies_count'],
                             'retweets_count': row3['retweets_count'],
                             'likes_count': row3['likes_count'],
@@ -110,8 +114,8 @@ def data_structure(csv_file, csv_file2, csv_file3):
                     csv_rows.append(
                         {'sentiment': sentiment_output(tweet), 'id': row2['id'],
                          'conversation_id': row2['conversation_id'], 'username': row2['username'],
-                         'name': row2['name'], 'tweet': row2['tweet'], 'mentions': row2['mentions'],
-                         'photos': row2['photos'], 'replies_count': row2['replies_count'],
+                         'name': row2['name'], 'date':row2['date'], 'tweet': row2['tweet'], 'mentions': row2['mentions'],
+                         'photos': row2['photos'], 'external_link': row2['external_link'], 'replies_count': row2['replies_count'],
                          'retweets_count': row2['retweets_count'], 'likes_count': row2['likes_count'],
                          'hashtags': row2['hashtags'], 'replies': csv_row})
                 f3.seek(0)

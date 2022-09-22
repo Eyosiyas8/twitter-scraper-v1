@@ -82,13 +82,13 @@ def filter_username(username, csv_file, csv_file1):
         reader = csv.DictReader(x.replace('\0', '') for x in f)
         tweet_data = []
         for row in reader:
-            data = ({'id':row['id'], 'conversation_id':row['conversation_id'], 'username':row['username'], 'name':row['name'], 'tweet':row['tweet'], 'mentions':row['mentions'], 'photos':row['photos'], 'replies_count':row['replies_count'], 'retweets_count':row['retweets_count'], 'likes_count':row['likes_count'], 'hashtags':row['hashtags'], 'language':row['language'], 'link':row['link'], 'video':row['video']})
+            data = ({'id':row['id'], 'conversation_id':row['conversation_id'], 'username':row['username'], 'name':row['name'], 'date':row['date'], 'tweet':row['tweet'], 'mentions':row['mentions'], 'photos':row['photos'], 'external_link':row['quote_url'], 'replies_count':row['replies_count'], 'retweets_count':row['retweets_count'], 'likes_count':row['likes_count'], 'hashtags':row['hashtags'], 'language':row['language'], 'link':row['link'], 'video':row['video']})
             if row["id"] == row["conversation_id"] and username.lower() == row['username']:
                 tweet_data.append(data)
                 
 # Storing data intp a separate csv file
     with open(csv_file1, 'w', newline='', encoding='utf-8') as file:
-        writer = csv.DictWriter(file, fieldnames={'id', 'conversation_id', 'username', 'name', 'tweet', 'mentions', 'photos', 'replies_count',
+        writer = csv.DictWriter(file, fieldnames={'id', 'conversation_id', 'username', 'name', 'date', 'tweet', 'mentions', 'photos', 'external_link', 'replies_count',
                  'retweets_count', 'likes_count', 'hashtags', 'language', 'link', 'video'})
         writer.writeheader()
         writer.writerows(tweet_data)
@@ -101,7 +101,7 @@ def filter_replies(username, csv_file, csv_file2):
         reader = csv.DictReader(x.replace('\0', '') for x in f)
         reply_data = []
         for row in reader:
-            data = ({'id':row['id'], 'conversation_id':row['conversation_id'], 'username':row['username'], 'name':row['name'], 'tweet':row['tweet'], 'mentions':row['mentions'], 'photos':row['photos'], 'replies_count':row['replies_count'], 'retweets_count':row['retweets_count'], 'likes_count':row['likes_count'], 'hashtags':row['hashtags'], 'language':row['language'], 'link':row['link'], 'video':row['video']})
+            data = ({'id':row['id'], 'conversation_id':row['conversation_id'], 'username':row['username'], 'name':row['name'], 'date':row['date'], 'tweet':row['tweet'], 'mentions':row['mentions'], 'photos':row['photos'], 'external_link':row['quote_url'], 'replies_count':row['replies_count'], 'retweets_count':row['retweets_count'], 'likes_count':row['likes_count'], 'hashtags':row['hashtags'], 'language':row['language'], 'link':row['link'], 'video':row['video']})
             if (username in row['reply_to'][1:50] and row["id"] != row["conversation_id"]):
                 tweets_id = ''.join(row['tweet'])
                 if tweets_id not in tweet_ids:
@@ -111,8 +111,8 @@ def filter_replies(username, csv_file, csv_file2):
 # Storing data intp a separate csv file
     with open(csv_file2, 'w', newline='', encoding='utf-8') as file:
         writer = csv.DictWriter(file,
-                                fieldnames={'id', 'conversation_id', 'username', 'name', 'tweet', 'mentions', 'photos',
-                                            'replies_count',
+                                fieldnames={'id', 'conversation_id', 'username', 'name', 'date', 'tweet', 'mentions', 'photos',
+                                            'external_link', 'replies_count',
                                             'retweets_count', 'likes_count', 'hashtags', 'language', 'link', 'video'})
         writer.writeheader()
         writer.writerows(reply_data)

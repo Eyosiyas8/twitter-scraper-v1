@@ -8,6 +8,7 @@ import tqdm
 from pymongo import MongoClient
 from datetime import date, datetime
 import sys
+import argparse
 
 basedir = os.path.dirname(os.path.abspath(__file__))
 
@@ -289,30 +290,32 @@ sleep(1)
 with open(key_word, "r", encoding='utf-8') as file:
     lines = file.readlines()
     lines = [line.rstrip() for line in lines]
-    if len(sys.argv) > 1:
-        for i in sys.argv:
-            print (i)
-            if type(i) is not datetime.date:
-                Keyword = i
-                since = None
-                until = None
-            elif type(i) is datetime.date:
-                since = sys.argv[i]
-                until = None
-            print(Keyword)
+    Keywords = []
+    since = None
+    until = None
+    for i in sys.argv[1:]:
+        if i.count('-')!=2:
+            Keywords.append(i)
+        elif i.count('-')==2:
+            since = i        
+            until = sys.argv[(sys.argv.index(since)) + 1]
+            # parser = argparse.ArgumentParser()
+            # parser.add_argument('date', type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%d'),)
+            # since = parser.parse_args([since]).date
+            # until = parser.parse_args([until]).date
+            break
+    if Keywords != []:
+        for Keyword in Keywords:
             csv_keyword = os.path.join(basedir, '../csv_files/') + Keyword + '.csv'
             try:
                 os.remove(csv_keyword)
                 scraper(Keyword, csv_keyword, since, until)
             except:
-                scraper(Keyword, csv_keyword, since, until)
-    
+                scraper(Keyword, csv_keyword, since, until)    
     else:
         for i in tqdm.tqdm(range(len(lines))):
             sleep(0.1)
             Keyword = lines[i]
-            since = None
-            until = None
             csv_keyword = os.path.join(basedir, '../csv_files/') + Keyword + '.csv'
             try:
                 os.remove(csv_keyword)
