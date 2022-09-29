@@ -9,7 +9,7 @@ from datetime import datetime
 basedir = os.path.dirname(os.path.abspath(__file__))
 # Initializing mongo db client
 db_connection = os.environ.get('DB_CONNECTION')
-db_client = 'twitter_data'
+db_client = 'twitter-data'
 db_collection = 'twitter'
 client = MongoClient(db_connection)
 print(db_connection)
