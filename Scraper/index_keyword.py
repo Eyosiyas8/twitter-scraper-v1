@@ -308,7 +308,8 @@ with open(key_word, "r", encoding='utf-8') as file:
     if since == None and until == None:
         until = datetime.date.today()
         since = str(until- datetime.timedelta(days=7))
-        print(since + ', ' + until )
+        until = str(until)
+        #print(since + ', ' + until )
     if Keywords != []:
         for Keyword in Keywords:
             csv_keyword = os.path.join(basedir, '../csv_files/') + Keyword + '.csv'
