@@ -7,6 +7,7 @@ from time import sleep
 import tqdm
 from pymongo import MongoClient
 from datetime import date, datetime
+import datetime
 import sys
 import argparse
 
@@ -212,7 +213,7 @@ def data_structure(csv_profile, csv_keyword1, csv_reply):
                 #f3.seek(0)
             f2.seek(0)
             csv_row1.append({
-                'Date_of_Scraping': datetime.today(),
+                'Date_of_Scraping': datetime.datetime.today(),
                 'Fullname': row1['Fullname'],
                 'UserName': row1['UserName'],
                 'Description': row1['Description'],
@@ -304,6 +305,10 @@ with open(key_word, "r", encoding='utf-8') as file:
             # since = parser.parse_args([since]).date
             # until = parser.parse_args([until]).date
             break
+    if since == None and until == None:
+        until = datetime.date.today()
+        since = str(until- datetime.timedelta(days=7))
+        print(since + ', ' + until )
     if Keywords != []:
         for Keyword in Keywords:
             csv_keyword = os.path.join(basedir, '../csv_files/') + Keyword + '.csv'
