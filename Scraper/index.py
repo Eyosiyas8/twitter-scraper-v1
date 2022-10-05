@@ -128,7 +128,7 @@ def data_structure(csv_file, csv_file2, csv_file3):
                 'Tweets': row1['Tweets'],
                 'Number of Followings': row1['Number of Followings'],
                 'Number of Followers': row1['Number of Followers'],
-                'Joined_date': row1['Joined_date'],
+                'Joined_Date': row1['Joined_date'],
                 'tweets': csv_rows})
             print('almost')
 
@@ -152,7 +152,7 @@ with open(acc_name, "r", encoding='utf-8') as file:
     lines = [line.rstrip() for line in lines]
     for i in tqdm.tqdm(range(len(lines))):
         sleep(0.1)
-        username = lines[i]
+        username = i
         url = "https://twitter.com/%s" % username
         print("current session is {}".format(driver.session_id))
         driver.get(url)

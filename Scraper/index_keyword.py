@@ -298,11 +298,13 @@ with open(key_word, "r", encoding='utf-8') as file:
             # since = parser.parse_args([since]).date
             # until = parser.parse_args([until]).date
             break
-    if since == None and until == None:
+    if since is None and until is None:
         until = datetime.date.today()
-        since = str(until- datetime.timedelta(days=7))
+        since = str(until - datetime.timedelta(days=7))
         until = str(until)
         #print(since + ', ' + until )
+    print(since)
+    print(until)
     if Keywords != []:
         for Keyword in Keywords:
             csv_keyword = os.path.join(basedir, '../csv_files/') + Keyword + '.csv'
@@ -321,10 +323,9 @@ with open(key_word, "r", encoding='utf-8') as file:
                 scraper(Keyword, csv_keyword, since, until)
             except:
                 scraper(Keyword, csv_keyword, since, until)
-    try:
-        data_structure_no_reply(csv_keyword, Keyword, since, until)
-    except:
-        print('No data has been scraped, please try again later!')
+    
+    data_structure_no_reply(csv_keyword, Keyword, since, until)
+    
 # with open(csv_keyword, 'r', encoding="utf-8") as f:
 #     reader = csv.DictReader(x.replace('\0', '') for x in f)
     # for row in reader:

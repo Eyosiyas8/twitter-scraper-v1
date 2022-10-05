@@ -49,6 +49,7 @@ def scraper(Keyword, csv_keyword, since, until):
     #c.Username = username
     c.Store_csv = True
     c.Since = since
+    c.Resume = 'n.raw'
     c.Until = until
     c.Output = csv_keyword
     c.Search = Keyword
@@ -57,8 +58,10 @@ def scraper(Keyword, csv_keyword, since, until):
 
     # Run
     try:
-        colored(255, 150, 50, (twint.run.Search(c)))
-        stylize(twint.run.Search(c), colored.fg("green"))
+        for i in range(100):
+            time.sleep(1)
+            stylize(twint.run.Search(c), colored.fg("green"))
+        os.remove('n.raw')
     except Exception as e:
         stylize('Scraping for ' + Keyword + '\'s account has failed ', colored.fg("red"))
         stylize(e, colored.fg("grey_46"))

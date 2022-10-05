@@ -47,14 +47,20 @@ def scrapper(username, csv_file):
     c.Username = username
     c.Store_csv = True
     #c.Since = since
+    c.Resume = 'n.raw'
     #c.Until = until
+    c.Resume = 'resume_file.raw'
     c.Output = csv_file
+    c.Count = True
     #c.Search = Keyword
     #c.Verified = True 
 
     # Run
     try:
-        stylize(twint.run.Search(c), colored.fg("green"))
+        for i in range(10):
+            time.sleep(1)
+            stylize(twint.run.Search(c), colored.fg("green"))
+        os.remove('n.raw')
     except Exception as e:
         stylize('Scraping for ' + username + '\'s account has failed ', colored.fg("red"))
         stylize(e, colored.fg("grey_46"))
@@ -63,6 +69,8 @@ def scrapper(username, csv_file):
     n = twint.Config()
     n.Search = "@" + username
     n.Replies = True
+    n.Resume = 'n.raw'
+    n.Count = True
     #n.Since = since
     #n.Until = until
     n.To = username
@@ -70,7 +78,10 @@ def scrapper(username, csv_file):
     n.Output = csv_file
     # Run
     try:
-        stylize(twint.run.Search(n), colored.fg("green"))
+        for i in range(10):
+            time.sleep(1)
+            stylize(twint.run.Search(n), colored.fg("green"))
+        os.remove('n.raw')
     except Exception as e:
         stylize('Scraping for replies to ' + username + '\'s account has failed ', colored.fg("red"))
         stylize(e, colored.fg("grey_46"))
