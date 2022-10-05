@@ -152,7 +152,8 @@ with open(acc_name, "r", encoding='utf-8') as file:
     lines = [line.rstrip() for line in lines]
     for i in tqdm.tqdm(range(len(lines))):
         sleep(0.1)
-        username = i
+        print(lines[i])
+        username = lines[i]
         url = "https://twitter.com/%s" % username
         print("current session is {}".format(driver.session_id))
         driver.get(url)

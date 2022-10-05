@@ -8,6 +8,7 @@ dependancies = os.environ.get('DEPENDANCIES')
 print(dependancies)
 sys.path.insert(1, dependancies)
 import colored
+import time
 from colored import stylize
 
 """
@@ -57,7 +58,7 @@ def scrapper(username, csv_file):
 
     # Run
     try:
-        for i in range(10):
+        for i in range(2):
             time.sleep(1)
             stylize(twint.run.Search(c), colored.fg("green"))
         os.remove('n.raw')
@@ -78,7 +79,7 @@ def scrapper(username, csv_file):
     n.Output = csv_file
     # Run
     try:
-        for i in range(10):
+        for i in range(2):
             time.sleep(1)
             stylize(twint.run.Search(n), colored.fg("green"))
         os.remove('n.raw')

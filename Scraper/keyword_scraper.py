@@ -8,6 +8,7 @@ dependancies = os.environ.get('DEPENDANCIES')
 print(dependancies)
 sys.path.insert(1, dependancies)
 import colored
+import time
 from colored import stylize
 
 """
