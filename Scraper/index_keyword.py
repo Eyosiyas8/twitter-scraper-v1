@@ -1,15 +1,17 @@
 from elasticsearch import Elasticsearch, helpers
 from ast import keyword
 from pickle import TRUE
-from profile_scraper_keyword import *
 from keyword_scraper import *
-from time import sleep
+from keyword_scraper import *
+from time import sleep, time
 import tqdm
+import logging
 from pymongo import MongoClient
 from datetime import date, datetime
 import datetime
 import sys
 import argparse
+from log import *
 
 basedir = os.path.dirname(os.path.abspath(__file__))
 
@@ -32,7 +34,14 @@ es=Elasticsearch([{'host':'localhost:9200','port':9200,'scheme':"http"}])
 key_word = csvfile1 = os.path.join(basedir, '../Authentication/words.txt')
 #key_word = 'C:/Users/Eyos/Documents/New_Twitter/twitter-scraper/Authentication/words.txt'
 
+
 def sentiment_output(tweet):
+    '''
+    :param tweet: The tweet to bechecked for keywords
+    :return sentiment: Implies how many keywords are found in the tweet
+
+    This function reads the tweet column from the csv file and checks if a sentiment keyword is present in the tweet
+    '''
     with open(key_word, "r",
               encoding='utf-8') as file:
         lines = file.readlines()
@@ -59,8 +68,16 @@ def sentiment_output(tweet):
     return sentiment
 
 
-# Structuring the data generated from the csv files to be inserted to the database
+# Structuring the data generated from the csv files to be inserted to the database for tweets with no reply
 def data_structure_no_reply(csv_keyword, Keyword, since, until):
+    '''
+    :param csv_keyword: This file contains all tweets scraped from the provided keyword.
+    :param keyword: This is the keyword that the tweets are scraped from.
+    :param since: This is the starting date of scraping.
+    :param until: This is the ending date of scraping.
+
+    This function takes the above arguments before returning a hierarchical structure to be saved in mongoDB.
+    '''
     with open(csv_keyword, 'r', encoding='utf-8') as f2:
         reader2 = csv.DictReader(f2)
         # csv_row1 = []
@@ -82,26 +99,26 @@ def data_structure_no_reply(csv_keyword, Keyword, since, until):
             row2['likes_count'] = row2['likes_count']
             row2['hashtags'] = row2['hashtags']
             # csv_row = []
-            """for row3 in reader3:
-                reply = row3['tweet']
-                if row2['id'] == row3['conversation_id']:
-                    data = {
-                        'id': row3['id'],
-                        'conversation_id': row3['conversation_id'],
-                        'username': row3['username'],
-                        'name': row3['name'],
-                        'reply': row3['tweet'],
-                        'mentions': row3['mentions'],
-                        'photos': row3['photos'],
-                        'replies_count': row3['replies_count'],
-                        'retweets_count': row3['retweets_count'],
-                        'likes_count': row3['likes_count'],
-                        'hashtags': row3['hashtags'],
-                        'sentiment': sentiment_output(reply)
+            # for row3 in reader3:
+            #     reply = row3['tweet']
+            #     if row2['id'] == row3['conversation_id']:
+            #         data = {
+            #             'id': row3['id'],
+            #             'conversation_id': row3['conversation_id'],
+            #             'username': row3['username'],
+            #             'name': row3['name'],
+            #             'reply': row3['tweet'],
+            #             'mentions': row3['mentions'],
+            #             'photos': row3['photos'],
+            #             'replies_count': row3['replies_count'],
+            #             'retweets_count': row3['retweets_count'],
+            #             'likes_count': row3['likes_count'],
+            #             'hashtags': row3['hashtags'],
+            #             'sentiment': sentiment_output(reply)
 
-                    }
-                    tweets_id = ''.join(row3['tweet'])
-                    csv_row.append(data)"""
+            #         }
+            #         tweets_id = ''.join(row3['tweet'])
+            #         csv_row.append(data)
             tweets_id = ''.join(row2['tweet'])
             if tweets_id not in tweet_ids:
                 tweet_ids.add(tweets_id)
@@ -129,158 +146,167 @@ def data_structure_no_reply(csv_keyword, Keyword, since, until):
             #     'tweets': csv_rows})
             # print('almost')
 
+    # Insert the structured data into a database and an elasticsearch instance
     try:
         with open(csv_keyword, encoding='utf-8') as file1:
             read1 = csv.DictReader(file1)
             helpers.bulk(es, read1, index="twitter_keyword")
         collection.insert_many(csv_row1)
         print(csv_row1)
+    
+    # Error handling
+    # Log an error message to log/ERROR.log
     except Exception as e:
-        print(e, "couldn't connect to elasticsearch!")
+        message = str(e)+" couldn't connect to elasticsearch!"
+        error_log(message)
+        print(e)
         collection.insert_many(csv_row1)
         print(csv_row1)
 
-    
-def data_structure(csv_profile, csv_keyword1, csv_reply):
-    with open(csv_profile, 'r', encoding='utf-8') as f1, open(csv_keyword1, 'r', encoding='utf-8') as f2, open(csv_reply, 'r', encoding='utf-8') as f3:
-        reader1 = csv.DictReader(f1)
-        reader2 = csv.DictReader(f2)
-        reader3 = csv.DictReader(f3)
-        csv_row1 = []
-        for row1 in reader1:
-            row1['Fullname'] = row1['Fullname']
-            row1['UserName'] = row1['UserName']
-            row1['Description'] = row1['Description']
-            row1['Tweets'] = row1['Tweets']
-            row1['Number of Followings'] = row1['Number of Followings']
-            row1['Number of Followers'] = row1['Number of Followers']
-            row1['Joined_date'] = row1['Joined_date']
-            csv_rows = []
-            for row2 in reader2:
-                tweet = row2['tweet']
-                row2['id'] = row2['id']
-                row2['conversation_id'] = row2['conversation_id']
-                row2['username'] = row2['username']
-                row2['time'] = row2['time']
-                row2['date'] = row2['date']
-                row2['timezone'] = row2['timezone']
-                row2['name'] = row2['name']
-                row2['tweet'] = row2['tweet']
-                row2['mentions'] = row2['mentions']
-                row2['photos'] = row2['photos']
-                row2['replies_count'] = row2['replies_count']
-                row2['retweets_count'] = row2['retweets_count']
-                row2['likes_count'] = row2['likes_count']
-                row2['hashtags'] = row2['hashtags']
-                csv_row = []
-                for row3 in reader3:
-                    reply = row3['tweet']
-                    if row2['id'] == row3['conversation_id']:
-                        data = {
-                            'id': row3['id'],
-                            'conversation_id': row3['conversation_id'],
-                            'username': row3['username'],
-                            'name': row3['name'],
-                            'reply': row3['tweet'],
-                            'mentions': row3['mentions'],
-                            'photos': row3['photos'],
-                            'replies_count': row3['replies_count'],
-                            'retweets_count': row3['retweets_count'],
-                            'likes_count': row3['likes_count'],
-                            'hashtags': row3['hashtags'],
-                            'sentiment': sentiment_output(reply)
+# Structuring the data generated from the csv files to be inserted to the database for tweets with replies
+# def data_structure(csv_profile, csv_keyword1, csv_reply):
+#     with open(csv_profile, 'r', encoding='utf-8') as f1, open(csv_keyword1, 'r', encoding='utf-8') as f2, open(csv_reply, 'r', encoding='utf-8') as f3:
+#         reader1 = csv.DictReader(f1)
+#         reader2 = csv.DictReader(f2)
+#         reader3 = csv.DictReader(f3)
+#         csv_row1 = []
+#         for row1 in reader1:
+#             row1['Fullname'] = row1['Fullname']
+#             row1['UserName'] = row1['UserName']
+#             row1['Description'] = row1['Description']
+#             row1['Tweets'] = row1['Tweets']
+#             row1['Number of Followings'] = row1['Number of Followings']
+#             row1['Number of Followers'] = row1['Number of Followers']
+#             row1['Joined_date'] = row1['Joined_date']
+#             csv_rows = []
+#             for row2 in reader2:
+#                 tweet = row2['tweet']
+#                 row2['id'] = row2['id']
+#                 row2['conversation_id'] = row2['conversation_id']
+#                 row2['username'] = row2['username']
+#                 row2['time'] = row2['time']
+#                 row2['date'] = row2['date']
+#                 row2['timezone'] = row2['timezone']
+#                 row2['name'] = row2['name']
+#                 row2['tweet'] = row2['tweet']
+#                 row2['mentions'] = row2['mentions']
+#                 row2['photos'] = row2['photos']
+#                 row2['replies_count'] = row2['replies_count']
+#                 row2['retweets_count'] = row2['retweets_count']
+#                 row2['likes_count'] = row2['likes_count']
+#                 row2['hashtags'] = row2['hashtags']
+#                 csv_row = []
+#                 for row3 in reader3:
+#                     reply = row3['tweet']
+#                     if row2['id'] == row3['conversation_id']:
+#                         data = {
+#                             'id': row3['id'],
+#                             'conversation_id': row3['conversation_id'],
+#                             'username': row3['username'],
+#                             'name': row3['name'],
+#                             'reply': row3['tweet'],
+#                             'mentions': row3['mentions'],
+#                             'photos': row3['photos'],
+#                             'replies_count': row3['replies_count'],
+#                             'retweets_count': row3['retweets_count'],
+#                             'likes_count': row3['likes_count'],
+#                             'hashtags': row3['hashtags'],
+#                             'sentiment': sentiment_output(reply)
 
-                        }
-                        tweets_id = ''.join(row3['tweet'])
-                        csv_row.append(data)
-                tweets_id = ''.join(row2['tweet'])
-                if tweets_id not in tweet_ids:
-                    tweet_ids.add(tweets_id)
-                    csv_rows.append(
-                        {'sentiment': sentiment_output(tweet), 'id': row2['id'],
-                        'conversation_id': row2['conversation_id'], 'time': row2['time'], 'date': row2['date'], 'timezone': row2['timezone'],                'timezone':row2['timezone'], 'username': row2['username'],
-                        'name': row2['name'], 'tweet': row2['tweet'], 'mentions': row2['mentions'],
-                        'photos': row2['photos'], 'replies_count': row2['replies_count'],
-                        'retweets_count': row2['retweets_count'], 'likes_count': row2['likes_count'],
-                        'hashtags': row2['hashtags'], 'replies': csv_row})
-                #f3.seek(0)
-            f2.seek(0)
-            # csv_row1.append({
-            #     'Date_of_Scraping': datetime.datetime.today(),
-            #     'Fullname': row1['Fullname'],
-            #     'UserName': row1['UserName'],
-            #     'Description': row1['Description'],
-            #     'Tweets': row1['Tweets'],
-            #     'Number of Followings': row1['Number of Followings'],
-            #     'Number of Followers': row1['Number of Followers'],
-            #     'Joined_date': row1['Joined_date'],
-            #     'Scraped_From': 'key word',
-            #     'Keyword used': Keyword,
-            #     'tweets': csv_rows})
-            # print('almost')
+#                         }
+#                         tweets_id = ''.join(row3['tweet'])
+#                         csv_row.append(data)
+#                 tweets_id = ''.join(row2['tweet'])
+#                 if tweets_id not in tweet_ids:
+#                     tweet_ids.add(tweets_id)
+#                     csv_rows.append(
+#                         {'sentiment': sentiment_output(tweet), 'id': row2['id'],
+#                         'conversation_id': row2['conversation_id'], 'time': row2['time'], 'date': row2['date'], 'timezone': row2['timezone'],                'timezone':row2['timezone'], 'username': row2['username'],
+#                         'name': row2['name'], 'tweet': row2['tweet'], 'mentions': row2['mentions'],
+#                         'photos': row2['photos'], 'replies_count': row2['replies_count'],
+#                         'retweets_count': row2['retweets_count'], 'likes_count': row2['likes_count'],
+#                         'hashtags': row2['hashtags'], 'replies': csv_row})
+#                 #f3.seek(0)
+#             f2.seek(0)
+#             # csv_row1.append({
+#             #     'Date_of_Scraping': datetime.datetime.today(),
+#             #     'Fullname': row1['Fullname'],
+#             #     'UserName': row1['UserName'],
+#             #     'Description': row1['Description'],
+#             #     'Tweets': row1['Tweets'],
+#             #     'Number of Followings': row1['Number of Followings'],
+#             #     'Number of Followers': row1['Number of Followers'],
+#             #     'Joined_date': row1['Joined_date'],
+#             #     'Scraped_From': 'key word',
+#             #     'Keyword used': Keyword,
+#             #     'tweets': csv_rows})
+#             # print('almost')
 
-    try:
-        with open(csv_keyword1, encoding='utf-8') as file1, open(csv_reply, encoding='utf-8') as file2:
-            read1 = csv.DictReader(file1)
-            read2 = csv.DictReader(file2)
-            helpers.bulk(es, read1, index="twitter-keyword")
-            helpers.bulk(es, read2, index="twitter-keyword")
-        collection.insert_many(csv_rows)
-        print(csv_rows)
-    except Exception as e:
-        print(e, "couldn't connect to elasticsearch!")
-        collection.insert_many(csv_rows)
-        print(csv_rows)
+    # Insert the structured data into a database and an elasticsearch instance
+#     try:
+#         with open(csv_keyword1, encoding='utf-8') as file1, open(csv_reply, encoding='utf-8') as file2:
+#             read1 = csv.DictReader(file1)
+#             read2 = csv.DictReader(file2)
+#             helpers.bulk(es, read1, index="twitter-keyword")
+#             helpers.bulk(es, read2, index="twitter-keyword")
+#         collection.insert_many(csv_rows)
+#         print(csv_rows)
+
+    # Error handling
+    # Log an error message to log/ERROR.log
+#     except Exception as e:
+#         message = str(e)+" couldn't connect to elasticsearch!"
+#         error_log(message)
+#         print(e)
+#         collection.insert_many(csv_rows)
+#         print(csv_rows)
+
+
+# words = open('/home/ubuntu/Documents/twitterProject2/Authentication/words.txt')       
+# with open(words, "r", encoding='utf-8') as file:
+#     lines = file.readlines()
+#     lines = [line.rstrip() for line in lines]
+#     for i in tqdm.tqdm(range(len(lines))):
+#         sleep(0.1)
+#         Keyword = lines[i]
+#         url = "https://twitter.com/%s" % username
+#         print("current session is {}".format(driver.session_id))
+#         driver.get(url)
+#         print(url)
+#         profile_scraper(username)
+#         csv_file = os.environ.get('csvFile') + username + ".csv"
+#         print(csv_file)
+#         csv_file1 = os.environ.get('csvFile1') + username + ".csv"
+#         csv_file2 = os.environ.get('csvFile2') + username + ".csv"
+#         csv_file3 = os.environ.get('csvFile3') + username + ".csv"
+#         try:
+#             os.remove(csv_file1)
+#             os.remove(csv_file2)
+#             os.remove(csv_file3)
+#         except:
+#             print('No Such File!')
+#         scrapper(username, csv_file1)
+#         try:
+#             filter_username(username, csv_file1, csv_file2)
+#             f=open(csv_file2, 'r+', encoding='utf-8')
+#             reader = csv.DictReader(f)
+#             lines=len(list(reader))
+#             while lines < 10:
+#                 filter_username(username, csv_file1, csv_file2)
+#                 f=open(csv_file2, 'r+', encoding='utf-8')
+#                 reader = csv.DictReader(f)
+#                 lines=len(list(reader))
+#                 f.close()
+
+#             filter_replies(username, csv_file1, csv_file3)
+#             sleep(2)
+#             data_structure(csv_file, csv_file2, csv_file3)
+#         except Exception as e:
+#             print(colored(255, 100, 50, e))
+#             continue
+#         sleep(1)
 
 # Initialize the scraping process
-"""
-words = open('/home/ubuntu/Documents/twitterProject2/Authentication/words.txt')       
-with open(words, "r", encoding='utf-8') as file:
-    lines = file.readlines()
-    lines = [line.rstrip() for line in lines]
-    for i in tqdm.tqdm(range(len(lines))):
-        sleep(0.1)
-        Keyword = lines[i]
-        url = "https://twitter.com/%s" % username
-        print("current session is {}".format(driver.session_id))
-        driver.get(url)
-        print(url)
-        profile_scraper(username)
-        csv_file = os.environ.get('csvFile') + username + ".csv"
-        print(csv_file)
-        csv_file1 = os.environ.get('csvFile1') + username + ".csv"
-        csv_file2 = os.environ.get('csvFile2') + username + ".csv"
-        csv_file3 = os.environ.get('csvFile3') + username + ".csv"
-        try:
-            os.remove(csv_file1)
-            os.remove(csv_file2)
-            os.remove(csv_file3)
-        except:
-            print('No Such File!')
-        scrapper(username, csv_file1)
-        try:
-            filter_username(username, csv_file1, csv_file2)
-            f=open(csv_file2, 'r+', encoding='utf-8')
-            reader = csv.DictReader(f)
-            lines=len(list(reader))
-            while lines < 10:
-                filter_username(username, csv_file1, csv_file2)
-                f=open(csv_file2, 'r+', encoding='utf-8')
-                reader = csv.DictReader(f)
-                lines=len(list(reader))
-                f.close()
-
-            filter_replies(username, csv_file1, csv_file3)
-            sleep(2)
-            data_structure(csv_file, csv_file2, csv_file3)
-        except Exception as e:
-            print(colored(255, 100, 50, e))
-            continue
-        sleep(1)
-"""
-
-sleep(1)
-#words = 'C:/Users/Eyos/Documents/New_Twitter/twitter-scraper/Authentication/words.txt'      
 with open(key_word, "r", encoding='utf-8') as file:
     lines = file.readlines()
     lines = [line.rstrip() for line in lines]
@@ -308,9 +334,13 @@ with open(key_word, "r", encoding='utf-8') as file:
     if Keywords != []:
         for Keyword in Keywords:
             csv_keyword = os.path.join(basedir, '../csv_files/') + Keyword + '.csv'
+            
+            # Remove csv_keyword file before scraping if it already exist
             try:
                 os.remove(csv_keyword)
                 scraper(Keyword, csv_keyword, since, until)
+            
+            # Jump directly to scraping if csv_keyword doesn't exist
             except:
                 scraper(Keyword, csv_keyword, since, until)    
     else:
@@ -318,10 +348,17 @@ with open(key_word, "r", encoding='utf-8') as file:
             sleep(0.1)
             Keyword = lines[i]
             csv_keyword = os.path.join(basedir, '../csv_files/') + Keyword + '.csv'
+            
+            # Remove csv_keyword file before scraping if it already exist
             try:
                 os.remove(csv_keyword)
                 scraper(Keyword, csv_keyword, since, until)
-            except:
+            
+            # Exception handling
+            # Logg a warning message to log/WARNING.log
+            except Exception as e:
+                message = str(e)+" No file with the name "+csv_keyword
+                warning_log(message)
                 scraper(Keyword, csv_keyword, since, until)
     
     data_structure_no_reply(csv_keyword, Keyword, since, until)

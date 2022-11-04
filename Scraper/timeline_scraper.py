@@ -1,3 +1,4 @@
+import twint
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium import webdriver
@@ -8,11 +9,11 @@ import os
 import pandas as pd
 import time
 from sys import platform
-import configparser
-from log import *
-import colored
 from colored import stylize
-import twint
+import colored
+from log import *
+import re
+import configparser
 
 
 config = configparser.ConfigParser()
@@ -21,29 +22,29 @@ web_elements = config['WebElements']
 iteration_number = config['IterationNumber']
 
 basedir = os.path.dirname(os.path.abspath(__file__))
+
 """
 if platform == "linux" or platform == "linux2":
     chro_path = os.path.join(basedir, '../chromedriver/chromedriver')
 elif platform == "win32":
     chro_path = os.path.join(basedir, '../chromedriver/chromedriver.exe')
+    
 """
-
 chromedriver_autoinstaller.install()
 options = Options()
 options.headless = True
 
 driver = webdriver.Chrome(options=options)
-
 data_set = []
 # print(search_page)
 # open("twitterpage.text","w").write(search_page.encode('utf-8'))
-
+print(web_elements.get('Fullname'))
 # Profile information scraper
-def profile_scraper(username, csv_profile):
+def profile_scraper(username, csv_file):
     '''
     :param username: This is the username from which the profile information is scraped from
     :param csv_file: This is the pre-initialized file that the user profile information is saved.
-    
+
     This function takes username and csv_file as an argument and returns the profile information of a user in csv file format.
     '''
     try:
@@ -65,7 +66,7 @@ def profile_scraper(username, csv_profile):
         print(None)
     try:
         wait = WebDriverWait(driver, 1)
-        element = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="react-root"]/div/div/div[2]/main/div/div/div/div/div/div[1]/div[1]/div/div/div/div/div[2]/div/div')))
+        element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('Tweets'))))
         Tweets = element.text
         print("Number of tweets: "+Tweets)
     except:
@@ -74,7 +75,7 @@ def profile_scraper(username, csv_profile):
 
     try:
         wait = WebDriverWait(driver, 1)
-        element = wait.until(EC.presence_of_element_located((By.XPATH, './/div[@class="css-1dbjc4n r-13awgt0 r-18u37iz r-1w6e6rj"]/div[1]/a//span')))
+        element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('No_Following'))))
         No_Following = element.text
         print(No_Following)
     except:
@@ -83,7 +84,7 @@ def profile_scraper(username, csv_profile):
 
     try:
         wait = WebDriverWait(driver, 1)
-        element = wait.until(EC.presence_of_element_located((By.XPATH, './/div[@class="css-1dbjc4n r-13awgt0 r-18u37iz r-1w6e6rj"]/div[2]/a//span')))
+        element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('No_Followers'))))
         No_Followers = element.text
         print(No_Followers)
 
@@ -93,7 +94,7 @@ def profile_scraper(username, csv_profile):
 
     try:
         wait = WebDriverWait(driver, 1)
-        element = wait.until(EC.presence_of_element_located((By.XPATH, './/span[contains(text(), "@")]')))
+        element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('Username'))))
         UserName = element.text
         print("Username: "+UserName)
     except:
@@ -102,7 +103,7 @@ def profile_scraper(username, csv_profile):
 
     try:
         wait = WebDriverWait(driver, 1)
-        element = wait.until(EC.presence_of_element_located((By.XPATH, './/span[contains(text(), "Joined")]')))
+        element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('Joined_date'))))
         Joined_date = element.text
         print(Joined_date)
     except:
@@ -114,76 +115,91 @@ def profile_scraper(username, csv_profile):
         columns=['Fullname', 'UserName', 'Description', 'Tweets', 'Number of Followings', 'Number of Followers',
                  'Joined_date'])
     
+    #file = os.path.join(basedir, '../csv_files/')
+
     # Save the data on csv_profile
-    df.to_csv(csv_profile)
+    df.to_csv(csv_file)
 
-# Scrapes tweets that contain a given keyword using twint
-def scraper(Keyword, csv_keyword, since, until):
+# Scrapes user timeline with it's corresponding reply using twint
+def tweet_scrapper(username, csv_file1):
     '''
-    :param Keyword: The keyword provided by the user that the scraper uses.
-    :param csv_keyword: The file in which all scraped tweets by the given keyword are saved.
-    :param since: The starting date for scraping.
-    :param until: The last date for scraping.
+    :param username: The username of the account from which the tweet will be scraped.
+    :param csv_file1: The file in which all scraped tweets and their replies are saved.
 
-    This function takes the keyword, since, until and the csv_keyword arguments and feed them to twints config format to scrape tweets that contain a given keyword within the provided timeframe before saving it to csv_keyword file.
+    This function takes the username and the csv_file1 arguments and feed them to twints config format to scrape the timeline of the given username and replies to a given username before saving it to csv_file1.
     '''
-    # Configure
+    # Configuration for tweets
     c = twint.Config()
-    #c.Username = username
+    c.Username = username
     c.Store_csv = True
-    c.Since = since
+    #c.Since = since
     c.Resume = 'tweet.raw'
-    c.Until = until
-    c.Output = csv_keyword
+    #c.Until = until
+    c.Output = csv_file1
     c.Count = True
-    c.Search = Keyword
-    #c.Limit = 1
+    #c.Search = Keyword
     #c.Verified = True 
+    stylize(twint.run.Search(c), colored.fg("green"))
 
     # Run
     # Set iteration number to scrape more data
     # Log total numbre of scraped tweets in log/INFO.log
     try:
-        for i in range(int(iteration_number.get('Keyword_tweet'))):
+        for i in range(int(iteration_number.get('Account_tweet'))):
             total_count = 0
             time.sleep(1)
             stylize(twint.run.Search(c), colored.fg("green"))
-            total_count += int(c.Count)
-        message = 'Number of scraped tweets is ' + str(total_count)
+        f1 = open(csv_file1, 'r', encoding='utf-8')
+        row_count = sum(1 for row in f1) - 1
+        print(row_count)
+        
+ 
+            # result=re.findall(r"\d", c.Count)
+            # total_count = ''
+            # for j in result:
+            #     total_count += j
+            #     print('the total count is '+total_count)
+            # total_count = int(total_count)
+            # print(total_count)
+        message = 'Number of scraped tweets is ' + str(row_count)
         info_log(message)
-        os.remove('n.raw')
+        os.remove('tweet.raw')
 
     # Error handler
     # Log error in log/ERROR.log
     except Exception as e:
-        message = str(e)+' Scraping for ' + Keyword + '\'s account has failed '
+        message = str(e)+' Scraping for ' + username + '\'s account has failed '
         error_log(message)
-        stylize('Scraping for ' + Keyword + '\'s account has failed ', colored.fg("red"))
+        stylize('Scraping for ' + username + '\'s account has failed ', colored.fg("red"))
         stylize(e, colored.fg("grey_46"))
-        #print(colored(100, e))
-
-# Scrape replies
-def scrape_replies(username, csv_raw_reply):
+    
+    # Configuration for replies
     n = twint.Config()
     n.Search = "@" + username
     n.Replies = True
-    n.Since = "2022-08-04"
+    n.Resume = 'reply.raw'
+    n.Count = True
+    #n.Since = since
     #n.Until = until
     n.To = username
-    n.Count = True
-    n.Resume = 'reply.raw'
     n.Store_csv = True
-    n.Output = csv_raw_reply
+    n.Output = csv_file1
 
     # Run
     # Set iteration number to scrape more data
     # Log total numbre of scraped tweets in log/INFO.log
     try:
-        for i in range(int(iteration_number.get('Keyword_reply'))):
+        for i in range(int(iteration_number.get('Account_reply'))):
             total_count = 0
             time.sleep(1)
-            colored(255, 50, 150, (twint.run.Search(n)))
-            total_count += int(c.Count)
+            stylize(twint.run.Search(n), colored.fg("green"))
+
+            result=re.findall(r"\d", c.Count)
+            total_count = ''
+            for i in result:
+                total_count += i
+            total_count = int(total_count)
+            print(total_count)
         message = 'Number of scraped replies is ' + str(total_count)
         info_log(message)
         os.remove('reply.raw')
@@ -191,10 +207,10 @@ def scrape_replies(username, csv_raw_reply):
     # Error handler
     # Log error in log/ERROR.log
     except Exception as e:
-        message = str(e)+' \nScraping for replies to ' + Keyword + '\'s account has failed '
+        message = str(e)+' \nScraping for replies to ' + username + '\'s account has failed '
         error_log(message)
-        print(colored(255, 200, 100, '\nScraping for replies to ' + Keyword + ' has failed'))
-        print(colored(255, 100, 100, e))
+        stylize('Scraping for replies to ' + username + '\'s account has failed ', colored.fg("red"))
+        stylize(e, colored.fg("grey_46"))
 
 
 '''
@@ -209,4 +225,4 @@ with open("C:/Users/User/PycharmProjects/twitterScraper/venv/Scripts/Authenticat
         profile_scraper()
 
 '''
-time.sleep(0.5)
+time.sleep(1)
