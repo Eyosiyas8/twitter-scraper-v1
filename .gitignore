@@ -16,4 +16,5 @@ Authentication/
 chromedriver/
 log/
 Pipfile
+.raw
 >>>>>>> d18517b382f768b30bbd03bd618110c1e62663b1
