@@ -137,6 +137,7 @@ def tweet_scrapper(username, csv_file1):
     #c.Until = until
     c.Output = csv_file1
     c.Count = True
+    c.Limit = 40
     #c.Search = Keyword
     #c.Verified = True 
     stylize(twint.run.Search(c), colored.fg("green"))
@@ -182,6 +183,7 @@ def tweet_scrapper(username, csv_file1):
     #n.Since = since
     #n.Until = until
     n.To = username
+    n.Limit = 40
     n.Store_csv = True
     n.Output = csv_file1
 

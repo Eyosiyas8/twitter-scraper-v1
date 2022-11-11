@@ -61,6 +61,15 @@ def critical_log(message):
     critical_logger = setup_logger('critical', '../log/CRITICAL.log')
     critical_logger.critical(message)
 
+def system_log(message):
+    '''
+    :param message: Critical situation specific message that is defined before calling this function.
+
+    This function takes the custom message and produces the ../log/SYSTEM.log file if it's not already created and append the system message into the file.
+    '''
+    critical_logger = setup_logger('system', '../log/SYSTEM.log')
+    critical_logger.error(message)
+
 # def another_method():
 #    # using logger defined above also works here
 #    logger.info('Inside method')

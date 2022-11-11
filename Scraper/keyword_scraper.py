@@ -137,7 +137,7 @@ def scraper(Keyword, csv_keyword, since, until):
     c.Output = csv_keyword
     c.Count = True
     c.Search = Keyword
-    #c.Limit = 1
+    # c.Limit = 20
     #c.Verified = True 
 
     # Run

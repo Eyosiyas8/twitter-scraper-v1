@@ -12,6 +12,7 @@ import datetime
 import sys
 import argparse
 from log import *
+import csv
 
 basedir = os.path.dirname(os.path.abspath(__file__))
 

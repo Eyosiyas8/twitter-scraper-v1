@@ -7,6 +7,7 @@ import tqdm
 from pymongo import MongoClient
 from datetime import datetime
 from log import *
+import sys
 
 basedir = os.path.dirname(os.path.abspath(__file__))
 # Initializing mongo db client
@@ -23,6 +24,17 @@ tweet_ids = set()
 csv_row1 = []
 data = []
 es=Elasticsearch([{'host':'localhost:9200','port':9200,'scheme':"http"}])
+
+class Log(object):
+    def __init__(self):
+        self.orgstdout = sys.stdout
+        self.log = open("log.txt", "a")
+
+    def write(self, msg):
+        self.orgstdout.write(msg)
+        self.log.write(msg)  
+
+sys.stdout = Log()
 
 # Generates the sentiment for a given tweet
 key_word = os.path.join(basedir, '../Authentication/words.txt')
@@ -172,8 +184,11 @@ with open(acc_name, "r", encoding='utf-8') as file:
     lines = file.readlines()
     lines = [line.rstrip() for line in lines]
     for i in tqdm.tqdm(range(len(lines))):
+        print(type(lines))
+        print(lines)
+        print(type(i))
         sleep(0.1)
-        # print(lines[i])
+        print(lines[i])
         username = lines[i]
         url = "https://twitter.com/%s" % username
         print("current session is {}".format(driver.session_id))
@@ -203,16 +218,6 @@ with open(acc_name, "r", encoding='utf-8') as file:
         # Execute filter_username, filter_replies and data_structure methods
         try:
             filter_username(username, csv_file1, csv_file2)
-            f=open(csv_file2, 'r+', encoding='utf-8')
-            reader = csv.DictReader(f)
-            lines=len(list(reader))
-            while lines < 10:
-                filter_username(username, csv_file1, csv_file2)
-                f=open(csv_file2, 'r+', encoding='utf-8')
-                reader = csv.DictReader(f)
-                lines=len(list(reader))
-                f.close()
-
             filter_replies(username, csv_file1, csv_file3)
             sleep(2)
             data_structure(csv_file, csv_file2, csv_file3)
