@@ -10,8 +10,7 @@ import time
 from sys import platform
 import configparser
 from log import *
-import colored
-from colored import stylize
+# from colored import stylize
 import twint
 
 
@@ -137,8 +136,8 @@ def scraper(Keyword, csv_keyword, since, until):
     c.Output = csv_keyword
     c.Count = True
     c.Search = Keyword
-    # c.Limit = 20
-    #c.Verified = True 
+    c.Limit = 100
+    # c.Verified = True 
 
     # Run
     # Set iteration number to scrape more data
@@ -147,19 +146,22 @@ def scraper(Keyword, csv_keyword, since, until):
         for i in range(int(iteration_number.get('Keyword_tweet'))):
             total_count = 0
             time.sleep(1)
-            stylize(twint.run.Search(c), colored.fg("green"))
-            total_count += int(c.Count)
-        message = 'Number of scraped tweets is ' + str(total_count)
-        info_log(message)
-        os.remove('n.raw')
+            twint.run.Search(c)
+        #     total_count += int(c.Count)
+        # message = 'Number of scraped tweets is ' + str(total_count)
+        # info_log(message)
+        os.remove('tweet.raw')
 
     # Error handler
     # Log error in log/ERROR.log
     except Exception as e:
-        message = str(e)+' Scraping for ' + Keyword + '\'s account has failed '
+        message = str(e)+' Scraping for ' + Keyword + ' keyword has failed '
         error_log(message)
-        stylize('Scraping for ' + Keyword + '\'s account has failed ', colored.fg("red"))
-        stylize(e, colored.fg("grey_46"))
+        for i in range(3):
+            twint.run.Search(c)
+
+        # stylize('Scraping for ' + Keyword + ' keyword has failed ', colored.fg("red"))
+        # stylize(e, colored.fg("grey_46"))
         #print(colored(100, e))
 
 # Scrape replies
@@ -182,10 +184,10 @@ def scrape_replies(username, csv_raw_reply):
         for i in range(int(iteration_number.get('Keyword_reply'))):
             total_count = 0
             time.sleep(1)
-            colored(255, 50, 150, (twint.run.Search(n)))
-            total_count += int(c.Count)
-        message = 'Number of scraped replies is ' + str(total_count)
-        info_log(message)
+            twint.run.Search(n)
+            # total_count += int(c.Count)
+        # message = 'Number of scraped replies is ' + str(total_count)
+        # info_log(message)
         os.remove('reply.raw')
 
     # Error handler
@@ -193,8 +195,8 @@ def scrape_replies(username, csv_raw_reply):
     except Exception as e:
         message = str(e)+' \nScraping for replies to ' + Keyword + '\'s account has failed '
         error_log(message)
-        print(colored(255, 200, 100, '\nScraping for replies to ' + Keyword + ' has failed'))
-        print(colored(255, 100, 100, e))
+        print('Scraping for replies to ' + Keyword + ' has failed')
+        # print(colored(255, 100, 100, e))
 
 
 '''

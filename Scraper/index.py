@@ -8,8 +8,8 @@ from pymongo import MongoClient
 from datetime import datetime
 from log import *
 import sys
+from sentiment import *
 
-basedir = os.path.dirname(os.path.abspath(__file__))
 # Initializing mongo db client
 db_connection = os.environ.get('DB_CONNECTION')
 db_client = 'twitter-data'
@@ -24,52 +24,6 @@ tweet_ids = set()
 csv_row1 = []
 data = []
 es=Elasticsearch([{'host':'localhost:9200','port':9200,'scheme':"http"}])
-
-class Log(object):
-    def __init__(self):
-        self.orgstdout = sys.stdout
-        self.log = open("log.txt", "a")
-
-    def write(self, msg):
-        self.orgstdout.write(msg)
-        self.log.write(msg)  
-
-sys.stdout = Log()
-
-# Generates the sentiment for a given tweet
-key_word = os.path.join(basedir, '../Authentication/words.txt')
-def sentiment_output(tweet):
-    '''
-    :param tweet: The tweet to bechecked for keywords
-    :return sentiment: Implies how many keywords are found in the tweet
-
-    This function reads the tweet column from the csv file and checks if a sentiment keyword is present in the tweet
-    '''
-    with open(key_word, "r",
-              encoding='utf-8') as file:
-        lines = file.readlines()
-        lines = [line.rstrip() for line in lines]
-
-        count = 0
-        sentiment = ''
-        for i in range(len(lines)):
-            keyWord = lines[i]
-            if keyWord in tweet.lower():
-                print(keyWord + str(count))
-                count += 1
-        if count == 1:
-            sentiment = 'low negative'
-        elif count == 2:
-            sentiment = 'negative'
-        elif count == 3:
-            sentiment = 'very negative'
-        elif count >= 4:
-            sentiment = 'extremely negative'
-        else:
-            sentiment = 'Unremarkable'
-
-    return sentiment
-
 
 # Structuring the data generated from the csv files to be inserted to the database
 def data_structure(csv_file, csv_file2, csv_file3):
@@ -155,7 +109,7 @@ def data_structure(csv_file, csv_file2, csv_file3):
                 'Tweets': row1['Tweets'],
                 'Number of Followings': row1['Number of Followings'],
                 'Number of Followers': row1['Number of Followers'],
-                'Joined_Date': row1['Joined_date'],
+                'Joined_date': row1['Joined_date'],
                 'tweets': csv_rows})
             print('almost')
 
@@ -219,7 +173,7 @@ with open(acc_name, "r", encoding='utf-8') as file:
         try:
             filter_username(username, csv_file1, csv_file2)
             filter_replies(username, csv_file1, csv_file3)
-            sleep(2)
+            sleep(1)
             data_structure(csv_file, csv_file2, csv_file3)
         
         # Exception handling
@@ -227,7 +181,7 @@ with open(acc_name, "r", encoding='utf-8') as file:
         except Exception as e:
             message = str(e)
             error_log(message)
-            stylize(e, colored.fg("grey_46"))
+            # stylize(e, colored.fg("grey_46"))
             continue
         sleep(1)
 driver.close()
@@ -237,4 +191,4 @@ json.dump(csv_row1, out_file, indent=6)
 
 out_file.close()'''
 
-time.sleep(5)
+sleep(1)

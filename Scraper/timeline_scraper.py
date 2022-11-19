@@ -9,8 +9,8 @@ import os
 import pandas as pd
 import time
 from sys import platform
-from colored import stylize
-import colored
+# from colored import stylize
+# import colored
 from log import *
 import re
 import configparser
@@ -49,68 +49,77 @@ def profile_scraper(username, csv_file):
     '''
     try:
         wait = WebDriverWait(driver, 5)
-        element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('Fullname'))))
-        Fullname = element.text
-        print("Fullname: " + Fullname)
-    except:
-        Fullname = None
-        print(None)
+        element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('UsernameNotFound'))))
+        UsernameNotFound = element.text
+        print(UsernameNotFound)
+        error_log('username '+ username +' not found!')
+        pass
+    except:    
+        try:
+            wait = WebDriverWait(driver, 5)
+            element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('Fullname'))))
+            Fullname = element.text
+            print("Fullname: " + Fullname)
+        except:
+            Fullname = None
+            print(None)
 
-    try:
-        wait = WebDriverWait(driver, 1)
-        element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('Description'))))
-        Description = element.text
-        print("Description: " + Description)
-    except:
-        Description = None
-        print(None)
-    try:
-        wait = WebDriverWait(driver, 1)
-        element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('Tweets'))))
-        Tweets = element.text
-        print("Number of tweets: "+Tweets)
-    except:
-        Tweets = None
-        print(None)
+        try:
+            wait = WebDriverWait(driver, 1)
+            element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('Description'))))
+            Description = element.text
+            print("Description: " + Description)
+        except:
+            Description = None
+            print(None)
+        try:
+            wait = WebDriverWait(driver, 1)
+            element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('Tweets'))))
+            Tweets = element.text
+            print("Number of tweets: "+Tweets)
+        except:
+            Tweets = None
+            print(None)
 
-    try:
-        wait = WebDriverWait(driver, 1)
-        element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('No_Following'))))
-        No_Following = element.text
-        print(No_Following)
-    except:
-        No_Following = None
-        print(None)
+        try:
+            wait = WebDriverWait(driver, 1)
+            element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('No_Following'))))
+            No_Following = element.text
+            print(No_Following)
+        except:
+            No_Following = None
+            print(None)
 
-    try:
-        wait = WebDriverWait(driver, 1)
-        element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('No_Followers'))))
-        No_Followers = element.text
-        print(No_Followers)
+        try:
+            wait = WebDriverWait(driver, 1)
+            element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('No_Followers'))))
+            No_Followers = element.text
+            print(No_Followers)
 
-    except:
-        No_Followers = None
-        print(None)
+        except:
+            No_Followers = None
+            print(None)
 
-    try:
-        wait = WebDriverWait(driver, 1)
-        element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('Username'))))
-        UserName = element.text
-        print("Username: "+UserName)
-    except:
-        UserName = None
-        print(None)
+        try:
+            wait = WebDriverWait(driver, 1)
+            element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('Username'))))
+            UserName = element.text
+            print("Username: "+UserName)
+        except:
+            UserName = None
+            print(None)
 
-    try:
-        wait = WebDriverWait(driver, 1)
-        element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('Joined_date'))))
-        Joined_date = element.text
-        print(Joined_date)
-    except:
-        Joined_date = None
-        print(Joined_date)
+        try:
+            wait = WebDriverWait(driver, 1)
+            element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('Joined_date'))))
+            Joined_date = element.text
+            print(Joined_date)
+        except:
+            Joined_date = None
+            print(Joined_date)
+            pass
 
-    df = pd.DataFrame(
+        df = pd.DataFrame(
         [[Fullname, UserName, Description, Tweets, No_Following, No_Followers, Joined_date]],
         columns=['Fullname', 'UserName', 'Description', 'Tweets', 'Number of Followings', 'Number of Followers',
                  'Joined_date'])
@@ -118,7 +127,7 @@ def profile_scraper(username, csv_file):
     #file = os.path.join(basedir, '../csv_files/')
 
     # Save the data on csv_profile
-    df.to_csv(csv_file)
+        df.to_csv(csv_file)
 
 # Scrapes user timeline with it's corresponding reply using twint
 def tweet_scrapper(username, csv_file1):
@@ -137,10 +146,10 @@ def tweet_scrapper(username, csv_file1):
     #c.Until = until
     c.Output = csv_file1
     c.Count = True
-    c.Limit = 40
+    c.Limit = 60
     #c.Search = Keyword
     #c.Verified = True 
-    stylize(twint.run.Search(c), colored.fg("green"))
+    # twint.run.Search(c)
 
     # Run
     # Set iteration number to scrape more data
@@ -149,7 +158,7 @@ def tweet_scrapper(username, csv_file1):
         for i in range(int(iteration_number.get('Account_tweet'))):
             total_count = 0
             time.sleep(1)
-            stylize(twint.run.Search(c), colored.fg("green"))
+            twint.run.Search(c)
         f1 = open(csv_file1, 'r', encoding='utf-8')
         row_count = sum(1 for row in f1) - 1
         print(row_count)
@@ -162,8 +171,8 @@ def tweet_scrapper(username, csv_file1):
             #     print('the total count is '+total_count)
             # total_count = int(total_count)
             # print(total_count)
-        message = 'Number of scraped tweets is ' + str(row_count)
-        info_log(message)
+        # message = 'Number of scraped tweets is ' + str(row_count)
+        # info_log(message)
         os.remove('tweet.raw')
 
     # Error handler
@@ -171,8 +180,8 @@ def tweet_scrapper(username, csv_file1):
     except Exception as e:
         message = str(e)+' Scraping for ' + username + '\'s account has failed '
         error_log(message)
-        stylize('Scraping for ' + username + '\'s account has failed ', colored.fg("red"))
-        stylize(e, colored.fg("grey_46"))
+        # stylize('Scraping for ' + username + '\'s account has failed ', colored.fg("red"))
+        # stylize(e, colored.fg("grey_46"))
     
     # Configuration for replies
     n = twint.Config()
@@ -194,15 +203,15 @@ def tweet_scrapper(username, csv_file1):
         for i in range(int(iteration_number.get('Account_reply'))):
             total_count = 0
             time.sleep(1)
-            stylize(twint.run.Search(n), colored.fg("green"))
+            twint.run.Search(n)
 
             result=re.findall(r"\d", c.Count)
             total_count = ''
             for i in result:
                 total_count += i
-            total_count = int(total_count)
-            print(total_count)
-        message = 'Number of scraped replies is ' + str(total_count)
+            # total_count = int(total_count)
+            # print(total_count)
+        # message = 'Number of scraped replies is ' + str(total_count)
         info_log(message)
         os.remove('reply.raw')
 
@@ -211,8 +220,8 @@ def tweet_scrapper(username, csv_file1):
     except Exception as e:
         message = str(e)+' \nScraping for replies to ' + username + '\'s account has failed '
         error_log(message)
-        stylize('Scraping for replies to ' + username + '\'s account has failed ', colored.fg("red"))
-        stylize(e, colored.fg("grey_46"))
+        # stylize('Scraping for replies to ' + username + '\'s account has failed ', colored.fg("red"))
+        # stylize(e, colored.fg("grey_46"))
 
 
 '''

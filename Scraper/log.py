@@ -1,6 +1,21 @@
 import logging
-formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+import sys
 
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+class Log(object):
+    def __init__(self):
+        self.orgstdout = sys.stdout
+        self.log = open("../log/library_log.log", "a")
+
+    def write(self, msg):
+        self.orgstdout.write(msg)
+        if ('Finished: Successfully collected' in msg) and ('+0300' not in msg):
+            info_log(msg)
+
+    def flush(self):
+        pass
+    
+sys.stdout = Log()
 
 def setup_logger(name, log_file, level=logging.INFO):
 
