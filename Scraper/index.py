@@ -1,12 +1,15 @@
 from elasticsearch import Elasticsearch, helpers
-from profile_scraper import *
-from tweet_scraper import *
+from timeline_scraper import *
+from tweet_filter import *
 from time import sleep
+import logging
 import tqdm
 from pymongo import MongoClient
 from datetime import datetime
+from log import *
+import sys
+from sentiment import *
 
-basedir = os.path.dirname(os.path.abspath(__file__))
 # Initializing mongo db client
 db_connection = os.environ.get('DB_CONNECTION')
 db_client = 'twitter-data'
@@ -22,39 +25,17 @@ csv_row1 = []
 data = []
 es=Elasticsearch([{'host':'localhost:9200','port':9200,'scheme':"http"}])
 
-# Generates the sentiment for a given tweet
-key_word = os.path.join(basedir, '../Authentication/words.txt')
-
-
-def sentiment_output(tweet):
-    with open(key_word, "r",
-              encoding='utf-8') as file:
-        lines = file.readlines()
-        lines = [line.rstrip() for line in lines]
-
-        count = 0
-        sentiment = ''
-        for i in range(len(lines)):
-            keyWord = lines[i]
-            if keyWord in tweet.lower():
-                print(keyWord + str(count))
-                count += 1
-        if count == 1:
-            sentiment = 'low negative'
-        elif count == 2:
-            sentiment = 'negative'
-        elif count == 3:
-            sentiment = 'very negative'
-        elif count >= 4:
-            sentiment = 'extremely negative'
-        else:
-            sentiment = 'Unremarkable'
-
-    return sentiment
-
-
 # Structuring the data generated from the csv files to be inserted to the database
 def data_structure(csv_file, csv_file2, csv_file3):
+    '''
+    :param csv_file: This file contains the profile information of the user.
+    :param csv_file2: This file contains the parent tweet from the username.
+    :param csv_file3: This file contains the filtered replys for the parent tweet.
+
+    This function takes three arguments; which are besically csv files, and returns a database model structure to be saved in mongoDB.
+
+    Then it reads the above csv files before returning a hierarchical structure to be saved in the mongoDB
+    '''
     with open(csv_file, 'r', encoding='utf-8') as f1, open(csv_file2, 'r', encoding='utf-8') as f2, open(csv_file3, 'r',
                                                                                                          encoding='utf-8') as f3:
         reader1 = csv.DictReader(f1)
@@ -128,10 +109,11 @@ def data_structure(csv_file, csv_file2, csv_file3):
                 'Tweets': row1['Tweets'],
                 'Number of Followings': row1['Number of Followings'],
                 'Number of Followers': row1['Number of Followers'],
-                'Joined_Date': row1['Joined_date'],
+                'Joined_date': row1['Joined_date'],
                 'tweets': csv_rows})
             print('almost')
 
+    # Insert the structured data into a database and an elasticsearch instance
     try:
         with open(csv_file2, encoding='utf-8') as file1, open(csv_file3, encoding='utf-8') as file2:
             read1 = csv.DictReader(file1)
@@ -140,8 +122,13 @@ def data_structure(csv_file, csv_file2, csv_file3):
             helpers.bulk(es, read2, index="twitter")
         collection.insert_many(csv_row1)
         print(csv_row1)
+    
+    # Error handling
+    # Log an error message to log/ERROR.log
     except Exception as e:
-        print(e, "couldn't connect to elasticsearch!")
+        message = str(e)+" couldn't connect to elasticsearch!"
+        error_log(message)
+        print(e)
         collection.insert_many(csv_row1)
         print(csv_row1)
 
@@ -151,6 +138,9 @@ with open(acc_name, "r", encoding='utf-8') as file:
     lines = file.readlines()
     lines = [line.rstrip() for line in lines]
     for i in tqdm.tqdm(range(len(lines))):
+        print(type(lines))
+        print(lines)
+        print(type(i))
         sleep(0.1)
         print(lines[i])
         username = lines[i]
@@ -164,30 +154,34 @@ with open(acc_name, "r", encoding='utf-8') as file:
         csv_file1 = os.path.join(basedir, '../csv_files/raw_dump_') + username + ".csv"
         csv_file2 = os.path.join(basedir, '../csv_files/parent_tweet_') + username + ".csv"
         csv_file3 = os.path.join(basedir, '../csv_files/reply_of_') + username + ".csv"
+
+        # Remove raw_dump, parent and reply csv files before scraping if they already exist
         try:
             os.remove(csv_file1)
             os.remove(csv_file2)
             os.remove(csv_file3)
-        except:
+        
+        # Exception handling
+        # Logg a warning message to log/WARNING.log
+        except Exception as e:
+            message = str(e)+' No Such File!'
+            warning_log(message)
             print('No Such File!')
-        scrapper(username, csv_file1)
+        tweet_scrapper(username, csv_file1)
+
+        # Execute filter_username, filter_replies and data_structure methods
         try:
             filter_username(username, csv_file1, csv_file2)
-            f=open(csv_file2, 'r+', encoding='utf-8')
-            reader = csv.DictReader(f)
-            lines=len(list(reader))
-            while lines < 10:
-                filter_username(username, csv_file1, csv_file2)
-                f=open(csv_file2, 'r+', encoding='utf-8')
-                reader = csv.DictReader(f)
-                lines=len(list(reader))
-                f.close()
-
             filter_replies(username, csv_file1, csv_file3)
-            sleep(2)
+            sleep(1)
             data_structure(csv_file, csv_file2, csv_file3)
+        
+        # Exception handling
+        # Log error message to log/ERROR.log
         except Exception as e:
-            stylize(e, colored.fg("grey_46"))
+            message = str(e)
+            error_log(message)
+            # stylize(e, colored.fg("grey_46"))
             continue
         sleep(1)
 driver.close()
@@ -197,4 +191,4 @@ json.dump(csv_row1, out_file, indent=6)
 
 out_file.close()'''
 
-time.sleep(5)
+sleep(1)

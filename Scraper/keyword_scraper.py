@@ -1,6 +1,9 @@
-import twint
-import random
-import csv
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+import chromedriver_autoinstaller
 import os
 import sys
 #import welcome
@@ -10,106 +13,165 @@ sys.path.insert(1, dependancies)
 import colored
 import time
 from colored import stylize
+=======
+import pandas as pd
+import time
+from sys import platform
+import configparser
+from log import *
+# from colored import stylize
+import twint
 
+config = configparser.ConfigParser()
+config.read('../Authentication/elements_iteration.ini')
+web_elements = config['WebElements']
+iteration_number = config['IterationNumber']
+
+basedir = os.path.dirname(os.path.abspath(__file__))
 """
-Keyword = input("input the keyword you want to search by: ")
-keywordAppend = input("Do you want to append this keyword permanently to the file of you want to use it temporariy? p/t: ")
-if keywordAppend == 't':
-    print(keywordAppend)
-elif keywordAppend == 'p':
-    f=open('file.csv', 'a', encoding='utf-8')
-    f.write(Keyword)
-    print(keywordAppend)
-else:
-    print("Invalid Entry! Please try again! Thanks for using the scraper! :):)")
-
-since = input("Do you wanna select from when you want to search? y/n: ")
-until = input("Do you wanna select until when you want to search? y/n: ")
-if until == 'n':
-    until = None
-    print(until)
-elif until == 'y':
-    until = input("Enter the date you want to scrape until (use yyyy-mm-dd format): ")
-    print(until)
-else:
-    print("Invalid Entry! Please try again! Thanks for using the scraper! ")
-
-if since == 'n':
-    since = None
-    print(since)
-elif since == 'y':
-    since = input("Enter the date you want to scrape since (use yyyy-mm-dd format): ")
-    print(since)
-else:
-    print("Invalid Entry! Please try again! Thanks for using the scraper! ")
+if platform == "linux" or platform == "linux2":
+    chro_path = os.path.join(basedir, '../chromedriver/chromedriver')
+elif platform == "win32":
+    chro_path = os.path.join(basedir, '../chromedriver/chromedriver.exe')
 """
 
+chromedriver_autoinstaller.install()
+options = Options()
+options.headless = True
+
+driver = webdriver.Chrome(options=options)
+
+data_set = []
+# print(search_page)
+# open("twitterpage.text","w").write(search_page.encode('utf-8'))
+
+# Profile information scraper
+def profile_scraper(username, csv_profile):
+    '''
+    :param username: This is the username from which the profile information is scraped from
+    :param csv_file: This is the pre-initialized file that the user profile information is saved.
+    
+    This function takes username and csv_file as an argument and returns the profile information of a user in csv file format.
+    '''
+    try:
+        wait = WebDriverWait(driver, 5)
+        element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('Fullname'))))
+        Fullname = element.text
+        print("Fullname: " + Fullname)
+    except:
+        Fullname = None
+        print(None)
+
+    try:
+        wait = WebDriverWait(driver, 1)
+        element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('Description'))))
+        Description = element.text
+        print("Description: " + Description)
+    except:
+        Description = None
+        print(None)
+    try:
+        wait = WebDriverWait(driver, 1)
+        element = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="react-root"]/div/div/div[2]/main/div/div/div/div/div/div[1]/div[1]/div/div/div/div/div[2]/div/div')))
+        Tweets = element.text
+        print("Number of tweets: "+Tweets)
+    except:
+        Tweets = None
+        print(None)
+
+    try:
+        wait = WebDriverWait(driver, 1)
+        element = wait.until(EC.presence_of_element_located((By.XPATH, './/div[@class="css-1dbjc4n r-13awgt0 r-18u37iz r-1w6e6rj"]/div[1]/a//span')))
+        No_Following = element.text
+        print(No_Following)
+    except:
+        No_Following = None
+        print(None)
+
+    try:
+        wait = WebDriverWait(driver, 1)
+        element = wait.until(EC.presence_of_element_located((By.XPATH, './/div[@class="css-1dbjc4n r-13awgt0 r-18u37iz r-1w6e6rj"]/div[2]/a//span')))
+        No_Followers = element.text
+        print(No_Followers)
+
+    except:
+        No_Followers = None
+        print(None)
+
+    try:
+        wait = WebDriverWait(driver, 1)
+        element = wait.until(EC.presence_of_element_located((By.XPATH, './/span[contains(text(), "@")]')))
+        UserName = element.text
+        print("Username: "+UserName)
+    except:
+        UserName = None
+        print(None)
+
+    try:
+        wait = WebDriverWait(driver, 1)
+        element = wait.until(EC.presence_of_element_located((By.XPATH, './/span[contains(text(), "Joined")]')))
+        Joined_date = element.text
+        print(Joined_date)
+    except:
+        Joined_date = None
+        print(Joined_date)
+
+    df = pd.DataFrame(
+        [[Fullname, UserName, Description, Tweets, No_Following, No_Followers, Joined_date]],
+        columns=['Fullname', 'UserName', 'Description', 'Tweets', 'Number of Followings', 'Number of Followers',
+                 'Joined_date'])
+    
+    # Save the data on csv_profile
+    df.to_csv(csv_profile)
+
+# Scrapes tweets that contain a given keyword using twint
 def scraper(Keyword, csv_keyword, since, until):
+    '''
+    :param Keyword: The keyword provided by the user that the scraper uses.
+    :param csv_keyword: The file in which all scraped tweets by the given keyword are saved.
+    :param since: The starting date for scraping.
+    :param until: The last date for scraping.
+
+    This function takes the keyword, since, until and the csv_keyword arguments and feed them to twints config format to scrape tweets that contain a given keyword within the provided timeframe before saving it to csv_keyword file.
+    '''
     # Configure
     c = twint.Config()
     #c.Username = username
     c.Store_csv = True
     c.Since = since
-    c.Resume = 'n.raw'
+    c.Resume = 'tweet.raw'
     c.Until = until
     c.Output = csv_keyword
+    c.Count = True
     c.Search = Keyword
-    #c.Limit = 1
-    #c.Verified = True 
+    c.Limit = 100
+    # c.Verified = True 
 
     # Run
+    # Set iteration number to scrape more data
+    # Log total numbre of scraped tweets in log/INFO.log
     try:
-        for i in range(100):
+        for i in range(int(iteration_number.get('Keyword_tweet'))):
+            total_count = 0
             time.sleep(1)
-            stylize(twint.run.Search(c), colored.fg("green"))
-        os.remove('n.raw')
+            twint.run.Search(c)
+        #     total_count += int(c.Count)
+        # message = 'Number of scraped tweets is ' + str(total_count)
+        # info_log(message)
+        os.remove('tweet.raw')
+
+    # Error handler
+    # Log error in log/ERROR.log
     except Exception as e:
-        stylize('Scraping for ' + Keyword + '\'s account has failed ', colored.fg("red"))
-        stylize(e, colored.fg("grey_46"))
+        message = str(e)+' Scraping for ' + Keyword + ' keyword has failed '
+        error_log(message)
+        for i in range(3):
+            twint.run.Search(c)
+
+        # stylize('Scraping for ' + Keyword + ' keyword has failed ', colored.fg("red"))
+        # stylize(e, colored.fg("grey_46"))
         #print(colored(100, e))
-    
-    # Configure
-# Filter the username of the tweet owner
 
-def filter_tweet(Keyword, csv_keyword, username, csv_keyword1):
-
-    # Filter the original tweet from the raw_dump file
-    with open(csv_keyword, 'r', encoding="utf-8") as f:
-        reader = csv.DictReader(x.replace('\0', '') for x in f)
-        tweet_data = []
-        for row in reader:
-            data = ({'id':row['id'], 'conversation_id':row['conversation_id'], 'date':row['date'], 'time':row['time'], 'timezone':row['timezone'], 'username':row['username'], 'name':row['name'], 'tweet':row['tweet'], 'mentions':row['mentions'], 'photos':row['photos'], 'replies_count':row['replies_count'], 'retweets_count':row['retweets_count'], 'likes_count':row['likes_count'], 'hashtags':row['hashtags'], 'language':row['language'], 'link':row['link'], 'video':row['video']})
-            #print(row['username'])
-            if row["id"] == row["conversation_id"] and username.lower() == row['username']:
-                tweet_data.append(data)
-    
-    # Storing data intp a separate csv file
-    with open(csv_keyword1, 'w', newline='', encoding='utf-8') as file:
-        writer = csv.DictWriter(file, fieldnames={'id', 'conversation_id', 'date', 'time', 'timezone', 'username', 'name', 'tweet', 'mentions', 'photos', 'replies_count',
-                 'retweets_count', 'likes_count', 'hashtags', 'language', 'link', 'video'})
-        writer.writeheader()
-        writer.writerows(tweet_data)
-        f.close()
-    return csv_keyword1
-
-# Filter the original tweet from the raw_dump file
-"""def filter_parent_tweet(username, Keyword, csv_keyword, csv_keyword1):
-
-    with open(csv_file, 'r', encoding="utf-8") as f:
-        reader = csv.DictReader(x.replace('\0', '') for x in f)
-        tweet_data = []
-        for row in reader:
-            data = ({'id':row['id'], 'conversation_id':row['conversation_id'], 'username':row['username'], 'name':row['name'], 'tweet':row['tweet'], 'mentions':row['mentions'], 'photos':row['photos'], 'replies_count':row['replies_count'], 'retweets_count':row['retweets_count'], 'likes_count':row['likes_count'], 'hashtags':row['hashtags'], 'language':row['language'], 'link':row['link'], 'video':row['video']})
-            tweet_data.append(data)
-                
-# Storing data intp a separate csv file
-    with open(csv_keyword1, 'w', newline='', encoding='utf-8') as file:
-        writer = csv.DictWriter(file, fieldnames={'id', 'conversation_id', 'username', 'name', 'tweet', 'mentions', 'photos', 'replies_count',
-                 'retweets_count', 'likes_count', 'hashtags', 'language', 'link', 'video'})
-        writer.writeheader()
-        writer.writerows(tweet_data)
-        f.close()
-"""
 # Scrape replies
 def scrape_replies(username, csv_raw_reply):
     n = twint.Config()
@@ -118,35 +180,43 @@ def scrape_replies(username, csv_raw_reply):
     n.Since = "2022-08-04"
     #n.Until = until
     n.To = username
+    n.Count = True
+    n.Resume = 'reply.raw'
     n.Store_csv = True
     n.Output = csv_raw_reply
+
     # Run
+    # Set iteration number to scrape more data
+    # Log total numbre of scraped tweets in log/INFO.log
     try:
-        colored(255, 50, 150, (twint.run.Search(n)))
+        for i in range(int(iteration_number.get('Keyword_reply'))):
+            total_count = 0
+            time.sleep(1)
+            twint.run.Search(n)
+            # total_count += int(c.Count)
+        # message = 'Number of scraped replies is ' + str(total_count)
+        # info_log(message)
+        os.remove('reply.raw')
+
+    # Error handler
+    # Log error in log/ERROR.log
     except Exception as e:
-        print(colored(255, 200, 100, '\nScraping for replies to ' + Keyword + ' has failed'))
-        print(colored(255, 100, 100, e))
+        message = str(e)+' \nScraping for replies to ' + Keyword + '\'s account has failed '
+        error_log(message)
+        print('Scraping for replies to ' + Keyword + ' has failed')
+        # print(colored(255, 100, 100, e))
 
-# Check if a reply is a direct reply of a given tweet
-def filter_replies(username, csv_raw_reply, csv_reply1): 
-    tweet_ids = set()
-    with open(csv_raw_reply, 'r', encoding="utf-8") as f:
-        reader = csv.DictReader(x.replace('\0', '') for x in f)
-        reply_data = []
-        for row in reader:
-            data = ({'id':row['id'], 'conversation_id':row['conversation_id'], 'username':row['username'], 'name':row['name'], 'tweet':row['tweet'], 'mentions':row['mentions'], 'photos':row['photos'], 'replies_count':row['replies_count'], 'retweets_count':row['retweets_count'], 'likes_count':row['likes_count'], 'hashtags':row['hashtags'], 'language':row['language'], 'link':row['link'], 'video':row['video']})
-            if (username in row['reply_to'][1:50] and row["id"] != row["conversation_id"]):
-                tweets_id = ''.join(row['tweet'])
-                if tweets_id not in tweet_ids:
-                    tweet_ids.add(tweets_id)
-                    reply_data.append(data)
 
-# Storing data intp a separate csv file
-    with open(csv_reply1, 'w', newline='', encoding='utf-8') as file:
-        writer = csv.DictWriter(file,
-                                fieldnames={'id', 'conversation_id', 'username', 'name', 'tweet', 'mentions', 'photos',
-                                            'replies_count',
-                                            'retweets_count', 'likes_count', 'hashtags', 'language', 'link', 'video'})
-        writer.writeheader()
-        writer.writerows(reply_data)
-        f.close()
+'''
+with open("C:/Users/User/PycharmProjects/twitterScraper/venv/Scripts/Authentication/Document.txt","r", encoding='utf-8') as file:
+    lines = file.readlines()
+    lines = [line.rstrip() for line in lines]
+    for i in range(len(lines)):
+        username=lines[i]
+        url = "https://twitter.com/%s" % username
+        driver.get(url)
+        print(url)
+        profile_scraper()
+
+'''
+time.sleep(0.5)
