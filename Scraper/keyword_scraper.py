@@ -13,7 +13,6 @@ sys.path.insert(1, dependancies)
 import colored
 import time
 from colored import stylize
-=======
 import pandas as pd
 import time
 from sys import platform
