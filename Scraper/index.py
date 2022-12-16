@@ -1,4 +1,6 @@
+from urllib.request import urlopen
 from elasticsearch import Elasticsearch, helpers
+import urllib3
 from timeline_scraper import *
 from tweet_filter import *
 from time import sleep
@@ -11,7 +13,7 @@ import sys
 from sentiment import *
 
 # Initializing mongo db client
-db_connection = os.environ.get('DB_CONNECTION')
+db_connection = 'mongodb://localhost:27017/'
 db_client = 'twitter-data'
 db_collection = 'twitter'
 client = MongoClient(db_connection)
@@ -98,7 +100,7 @@ def data_structure(csv_file, csv_file2, csv_file3):
                          'name': row2['name'], 'date':row2['date'], 'tweet': row2['tweet'], 'mentions': row2['mentions'],
                          'photos': row2['photos'], 'external_link': row2['external_link'], 'replies_count': row2['replies_count'],
                          'retweets_count': row2['retweets_count'], 'likes_count': row2['likes_count'],
-                         'hashtags': row2['hashtags'], 'replies': csv_row})
+                         'hashtags': row2['hashtags'], 'replies': csv_row, 'report': {'is_reported':None, 'reporting_date':None, 'reported_by':None}})
                 f3.seek(0)
             f2.seek(0)
             csv_row1.append({
@@ -109,7 +111,7 @@ def data_structure(csv_file, csv_file2, csv_file3):
                 'Tweets': row1['Tweets'],
                 'Number of Followings': row1['Number of Followings'],
                 'Number of Followers': row1['Number of Followers'],
-                'Joined_date': row1['Joined_date'],
+                'Joined_Date': row1['Joined_date'],
                 'tweets': csv_rows})
             print('almost')
 
@@ -146,6 +148,10 @@ with open(acc_name, "r", encoding='utf-8') as file:
         username = lines[i]
         url = "https://twitter.com/%s" % username
         print("current session is {}".format(driver.session_id))
+        try:
+            urlopen('https://twitter.com')
+        except:
+            break
         driver.get(url)
         print(url)
         csv_file = os.path.join(basedir, '../csv_files/') + username + ".csv"

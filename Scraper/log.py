@@ -1,16 +1,21 @@
 import logging
+import os
 import sys
-
+basedir = os.path.dirname(os.path.abspath(__file__))
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+rerun = False
 class Log(object):
     def __init__(self):
         self.orgstdout = sys.stdout
-        self.log = open("../log/library_log.log", "a")
+        log_file = os.path.join(basedir, '../log/library_log.py')
+        self.log = open(log_file, "a")
 
     def write(self, msg):
         self.orgstdout.write(msg)
         if ('Finished: Successfully collected' in msg) and ('+0300' not in msg):
             info_log(msg)
+            if ' 0 ' in msg:
+                rerun = True
 
     def flush(self):
         pass
@@ -43,7 +48,8 @@ def info_log(message):
 
     This function takes the custom message and produces the ../log/INFO.log file if it's not already created and append the info message into the file.
     '''
-    info_logger = setup_logger('info', '../log/INFO.log')
+    info_file_path = os.path.join(basedir, '../log/INFO.log')
+    info_logger = setup_logger('info', info_file_path)
     info_logger.info(message)
 
 # WARNING logger file
@@ -53,7 +59,8 @@ def warning_log(message):
 
     This function takes the custom message and produces the ../log/WARNING.log file if it's not already created and append the warning message into the file.
     '''
-    warning_logger = setup_logger('warning', '../log/WARNING.log')
+    warning_file_path = os.path.join(basedir, '../log/WARNING.log')
+    warning_logger = setup_logger('warning', warning_file_path)
     warning_logger.warning(message)
 
 # ERROR logger file
@@ -63,7 +70,8 @@ def error_log(message):
 
     This function takes the custom message and produces the ../log/ERROR.log file if it's not already created and append the error message into the file.
     '''
-    error_logger = setup_logger('error', '../log/ERROR.log')
+    error_file_path = os.path.join(basedir, '../log/ERROR.log')
+    error_logger = setup_logger('error', error_file_path)
     error_logger.error(message)
 
 # CRITICAL logger file
@@ -73,7 +81,8 @@ def critical_log(message):
 
     This function takes the custom message and produces the ../log/CRITICAL.log file if it's not already created and append the critical message into the file.
     '''
-    critical_logger = setup_logger('critical', '../log/CRITICAL.log')
+    critical_file_path = os.path.join(basedir, '../log/CRITICAL.log')
+    critical_logger = setup_logger('critical', critical_file_path)
     critical_logger.critical(message)
 
 def system_log(message):
@@ -82,7 +91,8 @@ def system_log(message):
 
     This function takes the custom message and produces the ../log/SYSTEM.log file if it's not already created and append the system message into the file.
     '''
-    critical_logger = setup_logger('system', '../log/SYSTEM.log')
+    system_log_file_path = os.path.join(basedir, '../log/SYSTEM.log')
+    critical_logger = setup_logger('system', system_log_file_path)
     critical_logger.error(message)
 
 # def another_method():

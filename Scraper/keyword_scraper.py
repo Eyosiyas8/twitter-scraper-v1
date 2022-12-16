@@ -21,12 +21,15 @@ from log import *
 # from colored import stylize
 import twint
 
-config = configparser.ConfigParser()
-config.read('../Authentication/elements_iteration.ini')
-web_elements = config['WebElements']
-iteration_number = config['IterationNumber']
 
 basedir = os.path.dirname(os.path.abspath(__file__))
+print(basedir)
+
+config = configparser.ConfigParser()
+elements_file = os.path.join(basedir, '../Authentication/elements_iteration.ini')
+config.read(elements_file)
+web_elements = config['WebElements']
+iteration_number = config['IterationNumber']
 """
 if platform == "linux" or platform == "linux2":
     chro_path = os.path.join(basedir, '../chromedriver/chromedriver')
@@ -149,27 +152,35 @@ def scraper(Keyword, csv_keyword, since, until):
     # Run
     # Set iteration number to scrape more data
     # Log total numbre of scraped tweets in log/INFO.log
-    try:
-        for i in range(int(iteration_number.get('Keyword_tweet'))):
-            total_count = 0
-            time.sleep(1)
-            twint.run.Search(c)
-        #     total_count += int(c.Count)
-        # message = 'Number of scraped tweets is ' + str(total_count)
-        # info_log(message)
-        os.remove('tweet.raw')
+    if csv_keyword:
+        try:
+            for i in range(int(iteration_number.get('Keyword_tweet'))):
+                total_count = 0
+                
+                time.sleep(1)
+                twint.run.Search(c)
+            #     total_count += int(c.Count)
+            # message = 'Number of scraped tweets is ' + str(total_count)
+            # info_log(message)
+            os.remove('tweet.raw')
 
-    # Error handler
-    # Log error in log/ERROR.log
-    except Exception as e:
-        message = str(e)+' Scraping for ' + Keyword + ' keyword has failed '
-        error_log(message)
-        for i in range(3):
-            twint.run.Search(c)
+        # Error handler
+        # Log error in log/ERROR.log
+        except Exception as e:
+            message = str(e)+' Scraping for ' + Keyword + ' keyword has failed '
+            error_log(message)
+            for i in range(3):
+                twint.run.Search(c)
+            try:
+                os.remove('tweet.raw')
+            except Exception as e:
+                print('No such file! ' + e)
 
         # stylize('Scraping for ' + Keyword + ' keyword has failed ', colored.fg("red"))
         # stylize(e, colored.fg("grey_46"))
         #print(colored(100, e))
+    else:
+        scraper(Keyword, csv_keyword, since, until)
 
 # Scrape replies
 def scrape_replies(username, csv_raw_reply):

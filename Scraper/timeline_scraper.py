@@ -15,13 +15,14 @@ from log import *
 import re
 import configparser
 
+basedir = os.path.dirname(os.path.abspath(__file__))
+
 
 config = configparser.ConfigParser()
-config.read('../Authentication/elements_iteration.ini')
+elements_file = os.path.join(basedir, '../Authentication/elements_iteration.ini')
+config.read(elements_file)
 web_elements = config['WebElements']
 iteration_number = config['IterationNumber']
-
-basedir = os.path.dirname(os.path.abspath(__file__))
 
 """
 if platform == "linux" or platform == "linux2":

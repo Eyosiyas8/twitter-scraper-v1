@@ -1,6 +1,8 @@
 from elasticsearch import Elasticsearch, helpers
 from ast import keyword
 from pickle import TRUE
+import urllib3
+from urllib.request import urlopen
 from keyword_scraper import *
 from keyword_scraper import *
 from time import sleep, time
@@ -17,7 +19,7 @@ from sentiment import *
 
 
 # Initializing mongo db client
-db_connection = os.environ.get('DB_CONNECTION')
+db_connection = 'mongodb://localhost:27017/'
 db_client = 'twitter-data'
 db_collection = 'twitter-keyword'
 client = MongoClient(db_connection)
@@ -91,7 +93,7 @@ def data_structure_no_reply(csv_keyword, Keyword, since, until):
                 'name': row2['name'], 'tweet': row2['tweet'], 'mentions': row2['mentions'],
                 'photos': row2['photos'], 'replies_count': row2['replies_count'],
                 'retweets_count': row2['retweets_count'], 'likes_count': row2['likes_count'],
-                'hashtags': row2['hashtags']})
+                'hashtags': row2['hashtags'], 'report': {'is_reported':None, 'reporting_date':None, 'reported_by':None}})
             #f3.seek(0)
             #f2.seek(0)
         csv_row1.append({'Date_of_Scraping': datetime.today(), 'Keyword': Keyword, 'From_Date': since, 'To_Date': until,'tweets': csv_rows})
@@ -115,7 +117,7 @@ def data_structure_no_reply(csv_keyword, Keyword, since, until):
             read1 = csv.DictReader(file1)
             helpers.bulk(es, read1, index="twitter_keyword")
         collection.insert_many(csv_row1)
-        print(csv_row1)
+        # print(csv_row1)
     
     # Error handling
     # Log an error message to log/ERROR.log
@@ -124,7 +126,7 @@ def data_structure_no_reply(csv_keyword, Keyword, since, until):
         error_log(message)
         print(e)
         collection.insert_many(csv_row1)
-        print(csv_row1)
+        # print(csv_row1)
 
 # Initialize the scraping process
 with open(key_word, "r", encoding='utf-8') as file:
@@ -159,6 +161,10 @@ with open(key_word, "r", encoding='utf-8') as file:
             try:
                 os.remove(csv_keyword)
                 scraper(Keyword, csv_keyword, since, until)
+                try:
+                    urlopen('https://twitter.com')
+                except:
+                    break
             
             # Jump directly to scraping if csv_keyword doesn't exist
             except:
@@ -180,5 +186,8 @@ with open(key_word, "r", encoding='utf-8') as file:
                 warning_log(message)
             scraper(Keyword, csv_keyword, since, until)
 
-    data_structure_no_reply(csv_keyword, Keyword, since, until)
+    try:
+        data_structure_no_reply(csv_keyword, Keyword, since, until)
+    except Exception as e:
+        error_log(str(e) + ' File Not Found!')
     

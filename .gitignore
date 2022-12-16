@@ -4,6 +4,7 @@ post-report/twitter-reporting-ids.txt
 post-report/twitter-reporting-ids.csv
 __pycache__
 .idea
+.raw
 =======
 __pycache__/
 src/

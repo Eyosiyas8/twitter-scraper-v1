@@ -48,7 +48,6 @@ def scrapper(username, csv_file):
     c.Username = username
     c.Store_csv = True
     #c.Since = since
-    c.Resume = 'n.raw'
     #c.Until = until
     c.Resume = 'resume_file.raw'
     c.Output = csv_file
@@ -57,14 +56,17 @@ def scrapper(username, csv_file):
     #c.Verified = True 
 
     # Run
-    try:
-        for i in range(2):
-            time.sleep(1)
-            stylize(twint.run.Search(c), colored.fg("green"))
-        os.remove('n.raw')
-    except Exception as e:
-        stylize('Scraping for ' + username + '\'s account has failed ', colored.fg("red"))
-        stylize(e, colored.fg("grey_46"))
+    if csv_file and 'resume_file.raw':
+        try:
+            for i in range(2):
+                time.sleep(1)
+                stylize(twint.run.Search(c), colored.fg("green"))
+            os.remove('n.raw')
+        except Exception as e:
+            stylize('Scraping for ' + username + '\'s account has failed ', colored.fg("red"))
+            stylize(e, colored.fg("grey_46"))
+    else:
+        scrapper(username, csv_file)
     
     # Configure
     n = twint.Config()
