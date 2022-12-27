@@ -4,7 +4,6 @@ from pickle import TRUE
 import urllib3
 from urllib.request import urlopen
 from keyword_scraper import *
-from keyword_scraper import *
 from time import sleep, time
 import tqdm
 import logging

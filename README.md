@@ -7,7 +7,7 @@ For keyword search, you can run index_keyword.py
 
 ### Installation Packages
 
-pip3 install elasticsearch tqdm pymongo parawrap selenium lxml pandas colored apscheduler chromedriver-autoinstaller
+pip3 install elasticsearch tqdm pymongo parawrap selenium lxml pandas colored apscheduler chromedriver-autoinstaller configparser
 pip3 install --upgrade -e git+https://github.com/twintproject/twint.git@origin/master#egg=twint
 
 ### For more information on twint

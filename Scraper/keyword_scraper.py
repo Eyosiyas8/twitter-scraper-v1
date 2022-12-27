@@ -157,7 +157,7 @@ def scraper(Keyword, csv_keyword, since, until):
             for i in range(int(iteration_number.get('Keyword_tweet'))):
                 total_count = 0
                 
-                time.sleep(1)
+                time.sleep(3)
                 twint.run.Search(c)
             #     total_count += int(c.Count)
             # message = 'Number of scraped tweets is ' + str(total_count)

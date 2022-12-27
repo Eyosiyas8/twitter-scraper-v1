@@ -86,7 +86,8 @@ def data_structure(csv_file, csv_file2, csv_file3):
                             'retweets_count': row3['retweets_count'],
                             'likes_count': row3['likes_count'],
                             'hashtags': row3['hashtags'],
-                            'sentiment': sentiment_output(reply)
+                            'sentiment': sentiment_output(reply),
+                            'reporting': {'is_reported': False, 'reporting_date': None, 'reported_by': None}
 
                         }
                         tweets_id = ''.join(row3['tweet'])
@@ -100,7 +101,7 @@ def data_structure(csv_file, csv_file2, csv_file3):
                          'name': row2['name'], 'date':row2['date'], 'tweet': row2['tweet'], 'mentions': row2['mentions'],
                          'photos': row2['photos'], 'external_link': row2['external_link'], 'replies_count': row2['replies_count'],
                          'retweets_count': row2['retweets_count'], 'likes_count': row2['likes_count'],
-                         'hashtags': row2['hashtags'], 'replies': csv_row, 'report': {'is_reported':None, 'reporting_date':None, 'reported_by':None}})
+                         'hashtags': row2['hashtags'], 'replies': csv_row, 'reporting': {'is_reported': False, 'reporting_date': None, 'reported_by': None}})
                 f3.seek(0)
             f2.seek(0)
             csv_row1.append({

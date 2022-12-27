@@ -147,7 +147,7 @@ def tweet_scrapper(username, csv_file1):
     #c.Until = until
     c.Output = csv_file1
     c.Count = True
-    c.Limit = 60
+    c.Limit = 200
     #c.Search = Keyword
     #c.Verified = True 
     # twint.run.Search(c)
@@ -157,8 +157,8 @@ def tweet_scrapper(username, csv_file1):
     # Log total numbre of scraped tweets in log/INFO.log
     try:
         for i in range(int(iteration_number.get('Account_tweet'))):
-            total_count = 0
-            time.sleep(1)
+            # total_count = 0
+            time.sleep(3)
             twint.run.Search(c)
         f1 = open(csv_file1, 'r', encoding='utf-8')
         row_count = sum(1 for row in f1) - 1
@@ -193,7 +193,7 @@ def tweet_scrapper(username, csv_file1):
     #n.Since = since
     #n.Until = until
     n.To = username
-    n.Limit = 40
+    # n.Limit = 40
     n.Store_csv = True
     n.Output = csv_file1
 
@@ -202,18 +202,18 @@ def tweet_scrapper(username, csv_file1):
     # Log total numbre of scraped tweets in log/INFO.log
     try:
         for i in range(int(iteration_number.get('Account_reply'))):
-            total_count = 0
-            time.sleep(1)
+            # total_count = 0
+            time.sleep(3)
             twint.run.Search(n)
 
-            result=re.findall(r"\d", c.Count)
-            total_count = ''
-            for i in result:
-                total_count += i
+            # result=re.findall(r"\d", c.Count)
+            # total_count = ''
+            # for i in result:
+                # total_count += i
             # total_count = int(total_count)
             # print(total_count)
         # message = 'Number of scraped replies is ' + str(total_count)
-        info_log(message)
+        # info_log(message)
         os.remove('reply.raw')
 
     # Error handler
