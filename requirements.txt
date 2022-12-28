@@ -1,0 +1,12 @@
+elasticsearch
+tqdm
+pymongo
+parawrap
+selenium
+lxml
+pandas
+colored
+apscheduler
+chromedriver-autoinstaller
+logging 
+configparser
