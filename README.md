@@ -13,6 +13,8 @@ pip3 install -r requirements.txt
 If you havn't already installed pip, you can install it with the following command -> 
 sudo apt install python3-pip
 
+_Also make sure you have Google Chrome installed in your machine_
+
 pip3 install --upgrade -e git+https://github.com/twintproject/twint.git@origin/master#egg=twint
 
 ### For more information on twint
