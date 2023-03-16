@@ -10,7 +10,7 @@ cd twitter-scraper
 
 pip3 install -r requirements.txt
 
-If you havn't already installed pip, you can install it with the following command
+If you havn't already installed pip, you can install it with the following command -> 
 sudo apt install python3-pip
 
 pip3 install --upgrade -e git+https://github.com/twintproject/twint.git@origin/master#egg=twint
