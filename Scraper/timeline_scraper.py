@@ -33,7 +33,7 @@ elif platform == "win32":
 """
 chromedriver_autoinstaller.install()
 options = Options()
-options.headless = True
+options.headless = False
 
 driver = webdriver.Chrome(options=options)
 data_set = []
@@ -147,6 +147,7 @@ def tweet_scrapper(username, csv_file1):
     #c.Until = until
     c.Output = csv_file1
     c.Count = True
+    # c.Proxy_host = "tor"
     c.Limit = 200
     #c.Search = Keyword
     #c.Verified = True 
@@ -237,4 +238,5 @@ with open("C:/Users/User/PycharmProjects/twitterScraper/venv/Scripts/Authenticat
         profile_scraper()
 
 '''
+
 time.sleep(1)

@@ -1,3 +1,4 @@
+import twint
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium import webdriver
@@ -19,7 +20,7 @@ from sys import platform
 import configparser
 from log import *
 # from colored import stylize
-import twint
+
 
 
 basedir = os.path.dirname(os.path.abspath(__file__))
