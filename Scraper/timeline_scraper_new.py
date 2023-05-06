@@ -138,13 +138,14 @@ def profile_scraper(username, csv_file):
         
 data = []
 def scrape_user_timeline(username, dom):
+    image_link = ''
     try:
         fullname = dom.xpath('.//span[@class="css-901oao css-16my406 css-1hf3ou5 r-poiln3 r-bcqeeo r-qvutc0"]/span')[0].text
         print(fullname)
         username = dom.xpath('.//div[@class="css-901oao css-1hf3ou5 r-14j79pv r-18u37iz r-37j5jr r-1wvb978 r-a023e6 r-16dba41 r-rjixqe r-bcqeeo r-qvutc0"]/span')[0].text
         print(username)
         try:
-            post_date = dom.xpath('.//time')[0].get_attribute('datetime')
+            post_date = dom.xpath('.//time')[0].attrib['datetime']
             print(post_date)
         except:
             NoSuchElementException
@@ -179,6 +180,12 @@ def scrape_user_timeline(username, dom):
         tweet_text = comment1, comment2, comment3
         # print(tweet_text)
         try:
+            image_link = dom.xpath('.//div[@data-testid="tweetPhoto"]/img')[0].attrib['src']
+            print(image_link)
+        except:
+            print(None)
+            pass
+        try:
             reply_count = dom.xpath('.//span[@class="css-901oao css-16my406 r-poiln3 r-n6v787 r-1cwl3u0 r-1k6nrdp r-1e081e0 r-qvutc0"]/span')[0].text
             print(reply_count)
         except:
@@ -202,7 +209,7 @@ def scrape_user_timeline(username, dom):
     except:
         wait = WebDriverWait(driver, 1)
         element = wait.until(EC.presence_of_element_located((By.XPATH, '//div[@data-testid = "app-bar-close"]'))).click()
-    tweet = (str(fullname), str(username), str(post_date), str(tweet_text), str(reply_count), str(retweet_count), str(likes_count), str(views_count))
+    tweet = (str(fullname), str(username), str(post_date), str(tweet_text), str(image_link),str(reply_count), str(retweet_count), str(likes_count), str(views_count))
     return tweet
           
             

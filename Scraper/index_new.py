@@ -64,6 +64,7 @@ def data_structure(csv_file, csv_timeline):
                 # row2['mentions'] = row2['mentions']
                 # row2['photos'] = row2['photos']
                 # row2['external_link'] = row2['external_link']
+                row2['Image'] = row2['Image']
                 row2['Number_of_replies'] = row2['Number_of_replies']
                 row2['Number_of_retweets'] = row2['Number_of_retweets']
                 row2['Number_of_likes'] = row2['Number_of_likes']
@@ -98,7 +99,7 @@ def data_structure(csv_file, csv_timeline):
                 #     tweet_ids.add(tweets_id)
                 csv_rows.append(
                     {'username': row2['Username'],
-                        'name': row2['Fullname'], 'date':row2['Timestamp'], 'tweet': row2['Tweets'], 
+                        'name': row2['Fullname'], 'date':row2['Timestamp'], 'tweet': row2['Tweets'], 'image_link': row2['Image'],
                         'Number_of_replies': row2['Number_of_replies'],
                         'retweets_count': row2['Number_of_retweets'], 'likes_count': row2['Number_of_likes'], 'views_count': row2['Number_of_views'],
                         'replies': [], 'reporting': {'is_reported': False, 'reporting_date': None, 'reported_by': None}})
@@ -187,6 +188,7 @@ with open(acc_name, "r", encoding='utf-8') as file:
                     for tweet_element in tweet_elements:
                         dom = etree.HTML(str(tweet_element))
                         tweet = scrape_user_timeline(username, dom)
+                        print('ERROR HERE!!!')
                         if tweet:
                             tweet_id = ''.join(tweet)
                             if tweet_id not in tweet_ids:
@@ -214,7 +216,7 @@ with open(acc_name, "r", encoding='utf-8') as file:
                             break
 
             with open(csv_timeline, 'w', newline='', encoding='utf-8') as f:
-                header = ['Fullname', 'Username', 'Timestamp', 'Tweets', 'Number_of_replies', 'Number_of_retweets', 'Number_of_likes', 'Number_of_views']
+                header = ['Fullname', 'Username', 'Timestamp', 'Tweets', 'Image', 'Number_of_replies', 'Number_of_retweets', 'Number_of_likes', 'Number_of_views']
                 writer = csv.writer(f)
                 writer.writerow(header)
                 writer.writerows(data)
