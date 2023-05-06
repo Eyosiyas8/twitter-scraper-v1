@@ -54,20 +54,20 @@ def data_structure(csv_file, csv_timeline):
             row1['Joined_date'] = row1['Joined_date']
             csv_rows = []
             for row2 in reader2:
-                tweet = row2['tweet']
+                # tweet_text = row2['tweet_text']
                 # row2['id'] = row2['id']
                 # row2['conversation_id'] = row2['conversation_id']
+                row2['Fullname'] = row2['Fullname']
                 row2['Username'] = row2['Username']
-                row2['fullname'] = row2['fullname']
-                row2['post_date'] = row2['postdate']
-                row2['tweet_text'] = row2['tweet_text']
+                row2['Timestamp'] = row2['Timestamp']
+                row2['Tweets'] = row2['Tweets']
                 # row2['mentions'] = row2['mentions']
                 # row2['photos'] = row2['photos']
                 # row2['external_link'] = row2['external_link']
-                row2['replies_count'] = row2['replies_count']
-                row2['retweets_count'] = row2['retweets_count']
-                row2['likes_count'] = row2['likes_count']
-                row2['views_count'] = row2['views_count']
+                row2['Number_of_replies'] = row2['Number_of_replies']
+                row2['Number_of_retweets'] = row2['Number_of_retweets']
+                row2['Number_of_likes'] = row2['Number_of_likes']
+                row2['Number_of_views'] = row2['Number_of_views']
                 # row2['hashtags'] = row2['hashtags']
                 csv_row = []
                 # for row3 in reader3:
@@ -93,15 +93,15 @@ def data_structure(csv_file, csv_timeline):
                 #         }
                 #         tweets_id = ''.join(row3['tweet'])
                 #         csv_row.append(data)
-                tweets_id = ''.join(row2['tweet'])
-                if tweets_id not in tweet_ids:
-                    tweet_ids.add(tweets_id)
-                    csv_rows.append(
-                        {'sentiment': sentiment_output(tweet), 'username': row2['Username'],
-                         'name': row2['fullname'], 'date':row2['post_date'], 'tweet': row2['tweet_text'], 
-                         'replies_count': row2['replies_count'],
-                         'retweets_count': row2['retweets_count'], 'likes_count': row2['likes_count'], 'views_count': row2['views_count'],
-                         'replies': [], 'reporting': {'is_reported': False, 'reporting_date': None, 'reported_by': None}})
+                # tweets_id = ''.join(row2['tweet'])
+                # if tweets_id not in tweet_ids:
+                #     tweet_ids.add(tweets_id)
+                csv_rows.append(
+                    {'username': row2['Username'],
+                        'name': row2['Fullname'], 'date':row2['Timestamp'], 'tweet': row2['Tweets'], 
+                        'Number_of_replies': row2['Number_of_replies'],
+                        'retweets_count': row2['Number_of_retweets'], 'likes_count': row2['Number_of_likes'], 'views_count': row2['Number_of_views'],
+                        'replies': [], 'reporting': {'is_reported': False, 'reporting_date': None, 'reported_by': None}})
                 # f3.seek(0)
             f2.seek(0)
             csv_row1.append({
@@ -118,11 +118,9 @@ def data_structure(csv_file, csv_timeline):
 
     # Insert the structured data into a database and an elasticsearch instance
     try:
-        with open(csv_file2, encoding='utf-8') as file1, open(csv_file3, encoding='utf-8') as file2:
+        with open(csv_timeline, encoding='utf-8') as file1:
             read1 = csv.DictReader(file1)
-            read2 = csv.DictReader(file2)
             helpers.bulk(es, read1, index="twitter")
-            helpers.bulk(es, read2, index="twitter")
         collection.insert_many(csv_row1)
         print(csv_row1)
     
@@ -216,7 +214,7 @@ with open(acc_name, "r", encoding='utf-8') as file:
                             break
 
             with open(csv_timeline, 'w', newline='', encoding='utf-8') as f:
-                header = ['Full Name', 'Username', 'Timestamp', 'Tweets', 'Number_of_replies', 'Number_of_retweets', 'Number_of_likes', 'Number_of_views']
+                header = ['Fullname', 'Username', 'Timestamp', 'Tweets', 'Number_of_replies', 'Number_of_retweets', 'Number_of_likes', 'Number_of_views']
                 writer = csv.writer(f)
                 writer.writerow(header)
                 writer.writerows(data)
@@ -230,15 +228,15 @@ with open(acc_name, "r", encoding='utf-8') as file:
 
 
 
-        csv_file1 = os.path.join(basedir, '../csv_files/raw_dump_') + username + ".csv"
-        csv_file2 = os.path.join(basedir, '../csv_files/parent_tweet_') + username + ".csv"
-        csv_file3 = os.path.join(basedir, '../csv_files/reply_of_') + username + ".csv"
+        # csv_file1 = os.path.join(basedir, '../csv_files/raw_dump_') + username + ".csv"
+        # csv_file2 = os.path.join(basedir, '../csv_files/parent_tweet_') + username + ".csv"
+        # csv_file3 = os.path.join(basedir, '../csv_files/reply_of_') + username + ".csv"
 
         # Remove raw_dump, parent and reply csv files before scraping if they already exist
-        try:
-            os.remove(csv_file1)
-            os.remove(csv_file2)
-            os.remove(csv_file3)
+        # try:
+        #     os.remove(csv_file1)
+        #     os.remove(csv_file2)
+        #     os.remove(csv_file3)
         
         # Exception handling
         # Logg a warning message to log/WARNING.log

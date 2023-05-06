@@ -134,6 +134,8 @@ def profile_scraper(username, csv_file):
 
     # Save the data on csv_profile
         df.to_csv(csv_file)
+
+        
 data = []
 def scrape_user_timeline(username, dom):
     try:
