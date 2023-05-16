@@ -1,3 +1,4 @@
+import json
 import twint
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
@@ -60,74 +61,91 @@ def profile_scraper(username, csv_file):
         print(UsernameNotFound)
         error_log('username '+ username +' not found!')
         pass
-    except:    
+    except:
         try:
             wait = WebDriverWait(driver, 5)
-            element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('Fullname'))))
-            Fullname = element.text
-            print("Fullname: " + Fullname)
+            element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('Empty_element')))).click()
+            profile_scraper(username, csv_file) 
+            
         except:
-            Fullname = None
-            print(None)
+            try:
+                wait = WebDriverWait(driver, 5)
+                element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('Fullname'))))
+                Fullname = element.text
+                print("Fullname: " + Fullname)
+            except:
+                Fullname = None
+                print(None)
 
-        try:
-            wait = WebDriverWait(driver, 1)
-            element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('Description'))))
-            Description = element.text
-            print("Description: " + Description)
-        except:
-            Description = None
-            print(None)
-        try:
-            wait = WebDriverWait(driver, 1)
-            element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('Tweets'))))
-            Tweets = element.text
-            print("Number of tweets: "+Tweets)
-        except:
-            Tweets = None
-            print(None)
+            try:
+                wait = WebDriverWait(driver, 1)
+                element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('Description'))))
+                Description = element.text
+                print("Description: " + Description)
+            except:
+                Description = None
+                print(None)
+            try:
+                wait = WebDriverWait(driver, 1)
+                element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('Tweets'))))
+                Tweets = element.text
+                print("Number of tweets: "+Tweets)
+            except:
+                Tweets = None
+                print(None)
 
-        try:
-            wait = WebDriverWait(driver, 1)
-            element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('No_Following'))))
-            No_Following = element.text
-            print(No_Following)
-        except:
-            No_Following = None
-            print(None)
+            try:
+                wait = WebDriverWait(driver, 1)
+                element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('No_Following'))))
+                No_Following = element.text
+                print(No_Following)
+            except:
+                No_Following = None
+                print(None)
 
-        try:
-            wait = WebDriverWait(driver, 1)
-            element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('No_Followers'))))
-            No_Followers = element.text
-            print(No_Followers)
+            try:
+                wait = WebDriverWait(driver, 1)
+                element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('No_Followers'))))
+                No_Followers = element.text
+                print(No_Followers)
 
-        except:
-            No_Followers = None
-            print(None)
+            except:
+                No_Followers = None
+                print(None)
 
-        try:
-            wait = WebDriverWait(driver, 1)
-            element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('Username'))))
-            UserName = element.text
-            print("Username: "+UserName)
-        except:
-            UserName = None
-            print(None)
+            try:
+                wait = WebDriverWait(driver, 1)
+                element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('Profile_Picture'))))
+                Profile_Picture = element.get_attribute('src') 
+                print(Profile_Picture)
 
-        try:
-            wait = WebDriverWait(driver, 1)
-            element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('Joined_date'))))
-            Joined_date = element.text
-            print(Joined_date)
-        except:
-            Joined_date = None
-            print(Joined_date)
-            pass
+            except:
+                Profile_Picture = None
+                print(None)
+
+            try:
+                wait = WebDriverWait(driver, 1)
+                element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('Username'))))
+                UserName = element.text
+                print("Username: "+UserName)
+            except:
+                UserName = None
+                print(None)
+
+            try:
+                wait = WebDriverWait(driver, 1)
+                element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('Joined_date'))))
+                Joined_date = element.text
+                print(Joined_date)
+            except:
+                Joined_date = None
+                print(Joined_date)
+                pass
+            
 
         df = pd.DataFrame(
-        [[Fullname, UserName, Description, Tweets, No_Following, No_Followers, Joined_date]],
-        columns=['Fullname', 'UserName', 'Description', 'Tweets', 'Number of Followings', 'Number of Followers',
+        [[Fullname, UserName, Description, Tweets, No_Following, No_Followers, Profile_Picture, Joined_date]],
+        columns=['Fullname', 'UserName', 'Description', 'Tweets', 'Number of Followings', 'Number of Followers', 'Profile_Picture',
                  'Joined_date'])
     
     #file = os.path.join(basedir, '../csv_files/')
@@ -138,7 +156,7 @@ def profile_scraper(username, csv_file):
         
 data = []
 def scrape_user_timeline(username, dom):
-    image_link = ''
+    image_link = []
     try:
         fullname = dom.xpath('.//span[@class="css-901oao css-16my406 css-1hf3ou5 r-poiln3 r-bcqeeo r-qvutc0"]/span')[0].text
         print(fullname)
@@ -155,32 +173,78 @@ def scrape_user_timeline(username, dom):
         # for i in tweets:
         #     comment = dom.xpath(tweets+'/span'+'[i]')
         #     tweet_text+=comment
+        tweet_text=''
+        full_text = dom.xpath('.//div[@data-testid="tweetText"]')
+        all_text = dom.xpath('.//div[@data-testid="tweetText"]/span')
+        hashtag = dom.xpath('.//div[@data-testid="tweetText"]/span/a')
+        external_link = dom.xpath('.//div[@data-testid="tweetText"]/a')
+        mention = dom.xpath('.//div[@data-testid="tweetText"]/div/span/a')
+        mentions = []
+        hashtags = []
+        external_links = []
 
         try:
-            comment1 = dom.xpath('.//div[@data-testid="tweetText"]/span')[0].text
-            print(comment1)
+            for i in range(10):
+                time.sleep(0.1)
+                print(range(len(full_text)))
+                if all_text:
+                    text = all_text[i].text            
+                    tweet_text += text
+                if hashtag:
+                    text = hashtag[i].text 
+                    hashtags.append(text)          
+                    tweet_text += text
+                if mention:
+                    text = mention[i].text 
+                    mentions.append(text)             
+                    tweet_text += text
+                if external_link:
+                    text = external_link[i].text 
+                    external_links.append(text)             
+                    tweet_text += text
+            print(tweet_text)
         except:
-            comment1 = ''
             pass
-        try: 
-            comment2 = dom.xpath('.//div[@data-testid="tweetText"]/div/span')[0].text
-            # print(comment2)
-        except:
-            comment2 = ''
-            # print(type(comment2))
-            pass
-        try:
-            comment3 = dom.xpath('.//div[@data-testid="tweetText"]/span[2]')[0].text
-            # print(comment3)
-        except:
-            comment3 = ''
-            # print(type(comment3))
-            pass
-        # time.sleep(0.5)
-        tweet_text = comment1, comment2, comment3
+        # try:
+        #     comment1 = dom.xpath('.//div[@data-testid="tweetText"]/span')[0].text
+        #     print(comment1)
+        # except:
+        #     comment1 = ''
+        #     pass
+        # try: 
+        #     comment2 = dom.xpath('.//div[@data-testid="tweetText"]/div/span')[0].text
+        #     # print(comment2)
+        # except:
+        #     comment2 = ''
+        #     # print(type(comment2))
+        #     pass
+        # try:
+        #     comment3 = dom.xpath('.//div[@data-testid="tweetText"]/span[2]')[0].text
+        #     # print(comment3)
+        # except:
+        #     comment3 = ''
+        #     # print(type(comment3))
+        #     pass
+        # # time.sleep(0.5)
+        # if comment1 == None:
+        #     comment1 = ''
+        # if comment2 == None:
+        #     comment2 == ''
+        # if comment3 == None:
+        #     comment3 = ''
+        # tweet_text = str(comment1) + str(comment2) + str(comment3)
         # print(tweet_text)
+        # tweet_text = full_text.text
+        # print(tweet_text)
+        profile_image = ''
         try:
-            image_link = dom.xpath('.//div[@data-testid="tweetPhoto"]/img')[0].attrib['src']
+            image_links = dom.xpath('.//div[@class="css-1dbjc4n r-1adg3ll r-1udh08x"]//img')
+            for i in range(len(image_links)):  
+                profile_image = image_links[0].attrib['src'] 
+                image = image_links[i].attrib['src'] 
+                if i==0 or 'profile_images' in image:
+                    continue             
+                image_link.append(image)
             print(image_link)
         except:
             print(None)
@@ -209,10 +273,10 @@ def scrape_user_timeline(username, dom):
     except:
         wait = WebDriverWait(driver, 1)
         element = wait.until(EC.presence_of_element_located((By.XPATH, '//div[@data-testid = "app-bar-close"]'))).click()
-    tweet = (str(fullname), str(username), str(post_date), str(tweet_text), str(image_link),str(reply_count), str(retweet_count), str(likes_count), str(views_count))
+    tweet = (fullname, username, post_date, tweet_text, json.dumps(list(image_link)), json.dumps(list(hashtags)), json.dumps(list(mentions)), json.dumps(list(external_links)), reply_count, retweet_count, likes_count, views_count)
     return tweet
           
-            
+
 
 
 

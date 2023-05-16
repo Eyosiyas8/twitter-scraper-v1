@@ -49,6 +49,7 @@ def data_structure(csv_file, csv_timeline):
             row1['UserName'] = row1['UserName']
             row1['Description'] = row1['Description']
             row1['Tweets'] = row1['Tweets']
+            row1['Profile_Picture'] = row1['Profile_Picture']
             row1['Number of Followings'] = row1['Number of Followings']
             row1['Number of Followers'] = row1['Number of Followers']
             row1['Joined_date'] = row1['Joined_date']
@@ -65,6 +66,9 @@ def data_structure(csv_file, csv_timeline):
                 # row2['photos'] = row2['photos']
                 # row2['external_link'] = row2['external_link']
                 row2['Image'] = row2['Image']
+                row2['Hashtags'] = row2['Hashtags']
+                row2['Mentions'] = row2['Mentions']
+                row2['Link'] = row2['Link']
                 row2['Number_of_replies'] = row2['Number_of_replies']
                 row2['Number_of_retweets'] = row2['Number_of_retweets']
                 row2['Number_of_likes'] = row2['Number_of_likes']
@@ -99,7 +103,7 @@ def data_structure(csv_file, csv_timeline):
                 #     tweet_ids.add(tweets_id)
                 csv_rows.append(
                     {'username': row2['Username'],
-                        'name': row2['Fullname'], 'date':row2['Timestamp'], 'tweet': row2['Tweets'], 'image_link': row2['Image'],
+                        'name': row2['Fullname'], 'date':row2['Timestamp'], 'tweet': row2['Tweets'], 'image_link': row2['Image'], 'hashtags': row2['Hashtags'], 'mentions': row2['Mentions'], 'link': row2['Link'],
                         'Number_of_replies': row2['Number_of_replies'],
                         'retweets_count': row2['Number_of_retweets'], 'likes_count': row2['Number_of_likes'], 'views_count': row2['Number_of_views'],
                         'replies': [], 'reporting': {'is_reported': False, 'reporting_date': None, 'reported_by': None}})
@@ -110,6 +114,7 @@ def data_structure(csv_file, csv_timeline):
                 'Fullname': row1['Fullname'],
                 'UserName': row1['UserName'],
                 'Description': row1['Description'],
+                'Profile_Picture': row1['Profile_Picture'],
                 'Tweets': row1['Tweets'],
                 'Number of Followings': row1['Number of Followings'],
                 'Number of Followers': row1['Number of Followers'],
@@ -148,10 +153,8 @@ with open(acc_name, "r", encoding='utf-8') as file:
         username = lines[i]
         url = "https://twitter.com/%s" % username
         print("current session is {}".format(driver.session_id))
-        try:
-            urlopen('https://twitter.com')
-        except:
-            break
+ 
+
         driver.get(url)
         print(url)
         csv_file = os.path.join(basedir, '../csv_files/') + username + ".csv"
@@ -177,9 +180,10 @@ with open(acc_name, "r", encoding='utf-8') as file:
                 scrolling = True
 
                 while scrolling:
-                    wait = WebDriverWait(driver, 1)
-                    element = wait.until(EC.presence_of_all_elements_located((By.XPATH, '//article[@data-testid = "tweet"]')))
-                    print(len(element))
+                    # wait = WebDriverWait(driver, 1)
+                    # element = wait.until(EC.presence_of_all_elements_located((By.XPATH, '//article[@data-testid = "tweet"]')))
+                    # print(len(element))
+                    
                     # Parse the HTML content of the page using BeautifulSoup
                     soup = BeautifulSoup(driver.page_source, 'lxml')
                     tweet_elements = soup.find_all('article', attrs={'data-testid': 'tweet'})
@@ -188,17 +192,17 @@ with open(acc_name, "r", encoding='utf-8') as file:
                     for tweet_element in tweet_elements:
                         dom = etree.HTML(str(tweet_element))
                         tweet = scrape_user_timeline(username, dom)
-                        print('ERROR HERE!!!')
                         if tweet:
                             tweet_id = ''.join(tweet)
                             if tweet_id not in tweet_ids:
                                 tweet_ids.add(tweet_id)
                                 data.append(tweet)
                     scroll_attempt = 0
-                    if len(data) > 10:
+                    if len(data) > 30:
                         break
                     while True:
                         # check scroll position
+                        time.sleep(1)
                         driver.execute_script('window.scrollTo(0, document.body.scrollHeight);')
                         time.sleep(1)
                         curr_position = driver.execute_script('return window.pageYOffset;')
@@ -216,7 +220,7 @@ with open(acc_name, "r", encoding='utf-8') as file:
                             break
 
             with open(csv_timeline, 'w', newline='', encoding='utf-8') as f:
-                header = ['Fullname', 'Username', 'Timestamp', 'Tweets', 'Image', 'Number_of_replies', 'Number_of_retweets', 'Number_of_likes', 'Number_of_views']
+                header = ['Fullname', 'Username', 'Timestamp', 'Tweets', 'Image', 'Hashtags', 'Mentions', 'Link', 'Number_of_replies', 'Number_of_retweets', 'Number_of_likes', 'Number_of_views']
                 writer = csv.writer(f)
                 writer.writerow(header)
                 writer.writerows(data)

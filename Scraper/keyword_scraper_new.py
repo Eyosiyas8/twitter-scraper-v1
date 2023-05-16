@@ -1,3 +1,4 @@
+import json
 import twint
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
@@ -136,27 +137,18 @@ from bs4 import BeautifulSoup
 #     # Save the data on csv_profile
 #         df.to_csv(csv_file)
 
-
-
-
+         
+            
 
 def keyword_scraper(keyword, dom):
-    wait = WebDriverWait(driver, 10)
-    element = wait.until(EC.presence_of_element_located((By.XPATH, "//input[@aria-label='Search query']")))
-    element.send_keys(keyword)
-    element.send_keys(Keys.ENTER)
-
-    wait = WebDriverWait(driver, 20)
-    element = wait.until(EC.presence_of_element_located((By.XPATH, ".//span[contains(text(), 'Latest')]")))
-    element.click()
-
+    image_link = []
     try:
         fullname = dom.xpath('.//span[@class="css-901oao css-16my406 css-1hf3ou5 r-poiln3 r-bcqeeo r-qvutc0"]/span')[0].text
         print(fullname)
         username = dom.xpath('.//div[@class="css-901oao css-1hf3ou5 r-14j79pv r-18u37iz r-37j5jr r-1wvb978 r-a023e6 r-16dba41 r-rjixqe r-bcqeeo r-qvutc0"]/span')[0].text
         print(username)
         try:
-            post_date = dom.xpath('.//time').get_attribute('datetime')[0]
+            post_date = dom.xpath('.//time')[0].attrib['datetime']
             print(post_date)
         except:
             NoSuchElementException
@@ -166,30 +158,82 @@ def keyword_scraper(keyword, dom):
         # for i in tweets:
         #     comment = dom.xpath(tweets+'/span'+'[i]')
         #     tweet_text+=comment
+        tweet_text=''
+        full_text = dom.xpath('.//div[@data-testid="tweetText"]')
+        all_text = dom.xpath('.//div[@data-testid="tweetText"]/span')
+        hashtag = dom.xpath('.//div[@data-testid="tweetText"]/span/a')
+        external_link = dom.xpath('.//div[@data-testid="tweetText"]/a')
+        mention = dom.xpath('.//div[@data-testid="tweetText"]/div/span/a')
+        mentions = []
+        hashtags = []
+        external_links = []
 
         try:
-            comment1 = dom.xpath('.//div[@data-testid="tweetText"]/span')[0].text
-            print(comment1)
+            for i in range(10):
+                time.sleep(0.1)
+                print(range(len(full_text)))
+                if all_text:
+                    text = all_text[i].text            
+                    tweet_text += text
+                if hashtag:
+                    text = hashtag[i].text 
+                    hashtags.append(text)          
+                    tweet_text += text
+                if mention:
+                    text = mention[i].text 
+                    mentions.append(text)             
+                    tweet_text += text
+                if external_link:
+                    text = external_link[i].text 
+                    external_links.append(text)             
+                    tweet_text += text
+            print(tweet_text)
         except:
-            comment1 = ''
             pass
-        try: 
-            comment2 = dom.xpath('.//div[@data-testid="tweetText"]/div/span')[0].text
-            # print(comment2)
-        except:
-            comment2 = ''
-            # print(type(comment2))
-            pass
-        try:
-            comment3 = dom.xpath('.//div[@data-testid="tweetText"]/span[2]')[0].text
-            # print(comment3)
-        except:
-            comment3 = ''
-            # print(type(comment3))
-            pass
-        # time.sleep(0.5)
-        tweet_text = comment1, comment2, comment3
+        # try:
+        #     comment1 = dom.xpath('.//div[@data-testid="tweetText"]/span')[0].text
+        #     print(comment1)
+        # except:
+        #     comment1 = ''
+        #     pass
+        # try: 
+        #     comment2 = dom.xpath('.//div[@data-testid="tweetText"]/div/span')[0].text
+        #     # print(comment2)
+        # except:
+        #     comment2 = ''
+        #     # print(type(comment2))
+        #     pass
+        # try:
+        #     comment3 = dom.xpath('.//div[@data-testid="tweetText"]/span[2]')[0].text
+        #     # print(comment3)
+        # except:
+        #     comment3 = ''
+        #     # print(type(comment3))
+        #     pass
+        # # time.sleep(0.5)
+        # if comment1 == None:
+        #     comment1 = ''
+        # if comment2 == None:
+        #     comment2 == ''
+        # if comment3 == None:
+        #     comment3 = ''
+        # tweet_text = str(comment1) + str(comment2) + str(comment3)
         # print(tweet_text)
+        # tweet_text = full_text.text
+        # print(tweet_text)
+        profile_image = ''
+        try:
+            image_links = dom.xpath('.//div[@class="css-1dbjc4n r-1adg3ll r-1udh08x"]//img')
+            for i in range(len(image_links)):  
+                profile_image = image_links[0].attrib['src'] 
+                image = image_links[i].attrib['src'] 
+                if i==0 or 'profile_images' in image:
+                    continue             
+                image_link.append(image)
+            print(image_link)
+        except:
+            print(None)
+            pass
         try:
             reply_count = dom.xpath('.//span[@class="css-901oao css-16my406 r-poiln3 r-n6v787 r-1cwl3u0 r-1k6nrdp r-1e081e0 r-qvutc0"]/span')[0].text
             print(reply_count)
@@ -214,11 +258,9 @@ def keyword_scraper(keyword, dom):
     except:
         wait = WebDriverWait(driver, 1)
         element = wait.until(EC.presence_of_element_located((By.XPATH, '//div[@data-testid = "app-bar-close"]'))).click()
-    tweet = (str(fullname), str(username), str(post_date), str(tweet_text), str(reply_count), str(retweet_count), str(likes_count), str(views_count))
+    tweet = (fullname, username, post_date, tweet_text, json.dumps(list(image_link)), json.dumps(list(hashtags)), json.dumps(list(mentions)), json.dumps(list(external_links)), reply_count, retweet_count, likes_count, views_count)
     return tweet
           
-            
-
 
 
 

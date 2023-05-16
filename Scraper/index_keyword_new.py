@@ -16,7 +16,7 @@ from sentiment import *
 # Initializing mongo db client
 db_connection = 'mongodb://localhost:27017/'
 db_client = 'twitter-data'
-db_collection = 'twitter'
+db_collection = 'keyword'
 client = MongoClient(db_connection)
 print(db_connection)
 db = client[db_client]
@@ -54,20 +54,21 @@ def data_structure(csv_keyword):
         #     row1['Joined_date'] = row1['Joined_date']
         csv_rows = []
         for row2 in reader2:
-            tweet = row2['tweet']
+            # tweet = row2['tweet']
             # row2['id'] = row2['id']
             # row2['conversation_id'] = row2['conversation_id']
+            row2['Fullname'] = row2['Fullname']
             row2['Username'] = row2['Username']
-            row2['fullname'] = row2['fullname']
-            row2['post_date'] = row2['postdate']
-            row2['tweet_text'] = row2['tweet_text']
-            # row2['mentions'] = row2['mentions']
-            # row2['photos'] = row2['photos']
-            # row2['external_link'] = row2['external_link']
-            row2['replies_count'] = row2['replies_count']
-            row2['retweets_count'] = row2['retweets_count']
-            row2['likes_count'] = row2['likes_count']
-            row2['views_count'] = row2['views_count']
+            row2['Timestamp'] = row2['Timestamp']
+            row2['Tweets'] = row2['Tweets']
+            row2['Image'] = row2['Image']
+            row2['Hashtags'] = row2['Hashtags']
+            row2['Mentions'] = row2['Mentions']
+            row2['Link'] = row2['Link']
+            row2['Number_of_replies'] = row2['Number_of_replies']
+            row2['Number_of_retweets'] = row2['Number_of_retweets']
+            row2['Number_of_likes'] = row2['Number_of_likes']
+            row2['Number_of_views'] = row2['Number_of_views']
             # row2['hashtags'] = row2['hashtags']
                 # csv_row = []
                 # for row3 in reader3:
@@ -93,15 +94,15 @@ def data_structure(csv_keyword):
                 #         }
                 #         tweets_id = ''.join(row3['tweet'])
                 #         csv_row.append(data)
-            tweets_id = ''.join(row2['tweet'])
-            if tweets_id not in tweet_ids:
-                tweet_ids.add(tweets_id)
-                csv_rows.append(
-                    {'sentiment': sentiment_output(tweet), 'username': row2['Username'],
-                        'name': row2['fullname'], 'date':row2['post_date'], 'tweet': row2['tweet_text'], 
-                        'replies_count': row2['replies_count'],
-                        'retweets_count': row2['retweets_count'], 'likes_count': row2['likes_count'], 'views_count': row2['views_count'],
-                        'replies': [], 'reporting': {'is_reported': False, 'reporting_date': None, 'reported_by': None}})
+            # tweets_id = ''.join(row2['tweet'])
+            # if tweets_id not in tweet_ids:
+            #     tweet_ids.add(tweets_id)
+            csv_rows.append(
+                    {'username': row2['Username'],
+                    'name': row2['Fullname'], 'date':row2['Timestamp'], 'tweet': row2['Tweets'], 'image_link': row2['Image'], 'hashtags': row2['Hashtags'], 'mentions': row2['Mentions'], 'link': row2['Link'],
+                    'Number_of_replies': row2['Number_of_replies'],
+                    'retweets_count': row2['Number_of_retweets'], 'likes_count': row2['Number_of_likes'], 'views_count': row2['Number_of_views'],
+                    'replies': [], 'reporting': {'is_reported': False, 'reporting_date': None, 'reported_by': None}})
                 # f3.seek(0)
             # f2.seek(0)
             # csv_row1.append({
@@ -118,11 +119,11 @@ def data_structure(csv_keyword):
 
     # Insert the structured data into a database and an elasticsearch instance
     try:
-        with open(csv_keyword, encoding='utf-8') as file1:
-            read1 = csv.DictReader(file1)
-            helpers.bulk(es, read1, index="twitter")
-        collection.insert_many(csv_row1)
-        print(csv_row1)
+        # with open(csv_keyword, encoding='utf-8') as file1:
+            # read1 = csv.DictReader(file1)
+            # helpers.bulk(es, read1, index="twitter")
+        collection.insert_many(csv_rows)
+        print(csv_rows)
     
     # Error handling
     # Log an error message to log/ERROR.log
@@ -130,8 +131,8 @@ def data_structure(csv_keyword):
         message = str(e)+" couldn't connect to elasticsearch!"
         error_log(message)
         print(e)
-        collection.insert_many(csv_row1)
-        print(csv_row1)
+        collection.insert_many(csv_rows)
+        print(csv_rows)
         
 
 # Initialize the scraping process
@@ -153,8 +154,14 @@ with open(acc_name, "r", encoding='utf-8') as file:
         # print(csv_file)
         csv_keyword = os.path.join(basedir, '../csv_files/tweets_') + keyword + '.csv'
         
-
-
+        wait = WebDriverWait(driver, 10)
+        element = wait.until(EC.presence_of_element_located((By.XPATH, "//input[@aria-label='Search query']")))
+        element.send_keys(keyword)
+        element.send_keys(Keys.ENTER)
+        time.sleep(3)
+        wait = WebDriverWait(driver, 20)
+        element = wait.until(EC.presence_of_element_located((By.XPATH, ".//span[contains(text(), 'Latest')]")))
+        element.click()
 
         try:
             # Define the URL for the user's timeline
@@ -179,7 +186,7 @@ with open(acc_name, "r", encoding='utf-8') as file:
                             tweet_ids.add(tweet_id)
                             data.append(tweet)
                 scroll_attempt = 0
-                if len(data) > 10:
+                if len(data) > 50:
                     break
                 while True:
                     # check scroll position
@@ -200,7 +207,7 @@ with open(acc_name, "r", encoding='utf-8') as file:
                         break
 
             with open(csv_keyword, 'w', newline='', encoding='utf-8') as f:
-                header = ['Full Name', 'Username', 'Timestamp', 'Tweets', 'Number_of_replies', 'Number_of_retweets', 'Number_of_likes', 'Number_of_views']
+                header = ['Fullname', 'Username', 'Timestamp', 'Tweets', 'Image', 'Hashtags', 'Mentions', 'Link', 'Number_of_replies', 'Number_of_retweets', 'Number_of_likes', 'Number_of_views']
                 writer = csv.writer(f)
                 writer.writerow(header)
                 writer.writerows(data)
