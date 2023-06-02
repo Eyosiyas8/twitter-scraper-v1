@@ -104,6 +104,8 @@ def data_structure(csv_keyword):
                     'retweets_count': row2['Number_of_retweets'], 'likes_count': row2['Number_of_likes'], 'views_count': row2['Number_of_views'],
                     'replies': [], 'reporting': {'is_reported': False, 'reporting_date': None, 'reported_by': None}})
                 # f3.seek(0)
+        csv_row1.append({'Date_of_Scraping': datetime.today(), 'Keyword': keyword, 'tweets': csv_rows})
+
             # f2.seek(0)
             # csv_row1.append({
             #     'Date_of_Scraping': datetime.today(),
@@ -122,8 +124,8 @@ def data_structure(csv_keyword):
         # with open(csv_keyword, encoding='utf-8') as file1:
             # read1 = csv.DictReader(file1)
             # helpers.bulk(es, read1, index="twitter")
-        collection.insert_many(csv_rows)
-        print(csv_rows)
+        collection.insert_many(csv_row1)
+        print(csv_row1)
     
     # Error handling
     # Log an error message to log/ERROR.log
@@ -140,120 +142,234 @@ acc_name = os.path.join(basedir, '../Authentication/words.txt')
 with open(acc_name, "r", encoding='utf-8') as file:
     lines = file.readlines()
     lines = [line.rstrip() for line in lines]
-    for i in tqdm.tqdm(range(len(lines))):
-        print(type(lines))
-        print(lines)
-        print(type(i))
-        sleep(0.1)
-        print(lines[i])
-        keyword = lines[i]
-        login()
-        print("current session is {}".format(driver.session_id))
-        # csv_file = os.path.join(basedir, '../csv_files/') + key_word + ".csv"
-        # profile_scraper(keyword, csv_file)
-        # print(csv_file)
-        csv_keyword = os.path.join(basedir, '../csv_files/tweets_') + keyword + '.csv'
-        
-        wait = WebDriverWait(driver, 10)
-        element = wait.until(EC.presence_of_element_located((By.XPATH, "//input[@aria-label='Search query']")))
-        element.send_keys(keyword)
-        element.send_keys(Keys.ENTER)
-        time.sleep(3)
-        wait = WebDriverWait(driver, 20)
-        element = wait.until(EC.presence_of_element_located((By.XPATH, ".//span[contains(text(), 'Latest')]")))
-        element.click()
+    keywords = []
+    print("current session is {}".format(driver.session_id))
 
-        try:
+    login()
+
+    for j in sys.argv[1:]:
+        keywords.append(j)
+    if len(keywords) >= 1:
+        for keyword in keywords:
+            csv_keyword = os.path.join(basedir, '../csv_files/tweets_') + keyword + '.csv'
+
+            wait = WebDriverWait(driver, 10)
+            element = wait.until(EC.presence_of_element_located((By.XPATH, "//input[@aria-label='Search query']")))
+            element.send_keys(Keys.CONTROL + "a")
+            element.send_keys(Keys.DELETE)
+            time.sleep(1)
+            element.send_keys(keyword)
+            element.send_keys(Keys.ENTER)
+            time.sleep(3)
+            wait = WebDriverWait(driver, 20)
+            element = wait.until(EC.presence_of_element_located((By.XPATH, ".//span[contains(text(), 'Latest')]")))
+            element.click()
+            try:
             # Define the URL for the user's timeline
             # Find all the tweet elements on the page
-            data = []
-            tweet_ids = set()
-            last_position = driver.execute_script('return window.pageYOffset;')
-            scrolling = True
+                data = []
+                tweet_ids = set()
+                last_position = driver.execute_script('return window.pageYOffset;')
+                scrolling = True
 
-            while scrolling:
-                # Parse the HTML content of the page using BeautifulSoup
-                soup = BeautifulSoup(driver.page_source, 'lxml')
-                tweet_elements = soup.find_all('article', attrs={'data-testid': 'tweet'})
-                print(len(tweet_elements))
-                time.sleep(2)
-                for tweet_element in tweet_elements:
-                    dom = etree.HTML(str(tweet_element))
-                    tweet = keyword_scraper(keyword, dom)
-                    if tweet:
-                        tweet_id = ''.join(tweet)
-                        if tweet_id not in tweet_ids:
-                            tweet_ids.add(tweet_id)
-                            data.append(tweet)
-                scroll_attempt = 0
-                if len(data) > 50:
-                    break
-                while True:
-                    # check scroll position
-                    driver.execute_script('window.scrollTo(0, document.body.scrollHeight);')
-                    time.sleep(1)
-                    curr_position = driver.execute_script('return window.pageYOffset;')
-                    if last_position == curr_position:
-                        scroll_attempt=+1
-
-                        # end of scroll region
-                        if scroll_attempt >= 3:
-                            scrolling = False
-                            break
-                        else:
-                            time.sleep(2) # attempt to scroll again
-                    else:
-                        last_position = curr_position
+                while scrolling:
+                    # Parse the HTML content of the page using BeautifulSoup
+                    soup = BeautifulSoup(driver.page_source, 'lxml')
+                    tweet_elements = soup.find_all('article', attrs={'data-testid': 'tweet'})
+                    print(len(tweet_elements))
+                    time.sleep(2)
+                    for tweet_element in tweet_elements:
+                        dom = etree.HTML(str(tweet_element))
+                        tweet = keyword_scraper(keyword, dom)
+                        if tweet:
+                            tweet_id = ''.join(tweet)
+                            if tweet_id not in tweet_ids:
+                                tweet_ids.add(tweet_id)
+                                data.append(tweet)
+                    scroll_attempt = 0
+                    if len(data) > 50:
                         break
+                    while True:
+                        # check scroll position
+                        driver.execute_script('window.scrollTo(0, document.body.scrollHeight);')
+                        time.sleep(1)
+                        curr_position = driver.execute_script('return window.pageYOffset;')
+                        if last_position == curr_position:
+                            scroll_attempt=+1
 
-            with open(csv_keyword, 'w', newline='', encoding='utf-8') as f:
-                header = ['Fullname', 'Username', 'Timestamp', 'Tweets', 'Image', 'Hashtags', 'Mentions', 'Link', 'Number_of_replies', 'Number_of_retweets', 'Number_of_likes', 'Number_of_views']
-                writer = csv.writer(f)
-                writer.writerow(header)
-                writer.writerows(data)
+                            # end of scroll region
+                            if scroll_attempt >= 3:
+                                scrolling = False
+                                break
+                            else:
+                                time.sleep(2) # attempt to scroll again
+                        else:
+                            last_position = curr_position
+                            break
 
-        except Exception as e:
-            message = str(e)
-            error_log(message)
-            continue
+                with open(csv_keyword, 'w', newline='', encoding='utf-8') as f:
+                    header = ['Fullname', 'Username', 'Timestamp', 'Tweets', 'Image', 'Hashtags', 'Mentions', 'Link', 'Number_of_replies', 'Number_of_retweets', 'Number_of_likes', 'Number_of_views']
+                    writer = csv.writer(f)
+                    writer.writerow(header)
+                    writer.writerows(data)
 
-        
+            except Exception as e:
+                message = str(e)
+                error_log(message)
+                continue
+
+            
 
 
 
-        # csv_file1 = os.path.join(basedir, '../csv_files/raw_dump_') + username + ".csv"
-        # csv_file2 = os.path.join(basedir, '../csv_files/parent_tweet_') + username + ".csv"
-        # csv_file3 = os.path.join(basedir, '../csv_files/reply_of_') + username + ".csv"
+            # csv_file1 = os.path.join(basedir, '../csv_files/raw_dump_') + username + ".csv"
+            # csv_file2 = os.path.join(basedir, '../csv_files/parent_tweet_') + username + ".csv"
+            # csv_file3 = os.path.join(basedir, '../csv_files/reply_of_') + username + ".csv"
 
-        # # Remove raw_dump, parent and reply csv files before scraping if they already exist
-        # try:
-        #     os.remove(csv_file1)
-        #     os.remove(csv_file2)
-        #     os.remove(csv_file3)
-        
-        # Exception handling
-        # Logg a warning message to log/WARNING.log
-        except Exception as e:
-            message = str(e)+' No Such File!'
-            warning_log(message)
-            print('No Such File!')
-        # tweet_scrapper(username, csv_file1)
+            # # Remove raw_dump, parent and reply csv files before scraping if they already exist
+            # try:
+            #     os.remove(csv_file1)
+            #     os.remove(csv_file2)
+            #     os.remove(csv_file3)
+            
+            # Exception handling
+            # Logg a warning message to log/WARNING.log
+            except Exception as e:
+                message = str(e)+' No Such File!'
+                warning_log(message)
+                print('No Such File!')
+            # tweet_scrapper(username, csv_file1)
 
-        # Execute filter_username, filter_replies and data_structure methods
-        try:
-            # filter_username(username, csv_file1, csv_timeline)
-            # filter_replies(username, csv_file1, csv_file3)
+            # Execute filter_username, filter_replies and data_structure methods
+            try:
+                # filter_username(username, csv_file1, csv_timeline)
+                # filter_replies(username, csv_file1, csv_file3)
+                sleep(1)
+                data_structure(csv_keyword)
+            
+            # Exception handling
+            # Log error message to log/ERROR.log
+            except Exception as e:
+                message = str(e)
+                error_log(message)
+                # stylize(e, colored.fg("grey_46"))
+                continue
             sleep(1)
-            data_structure(csv_keyword)
-        
-        # Exception handling
-        # Log error message to log/ERROR.log
-        except Exception as e:
-            message = str(e)
-            error_log(message)
-            # stylize(e, colored.fg("grey_46"))
-            continue
-        sleep(1)
+
+    else:
+        for i in tqdm.tqdm(range(len(lines))):
+            print(type(lines))
+            print(lines)
+            print(type(i))
+            sleep(0.1)
+            print(lines[i])
+            keyword = lines[i]
+            print("current session is {}".format(driver.session_id))
+            # csv_file = os.path.join(basedir, '../csv_files/') + key_word + ".csv"
+            # profile_scraper(keyword, csv_file)
+            # print(csv_file)
+            csv_keyword = os.path.join(basedir, '../csv_files/tweets_') + keyword + '.csv'
+            
+            wait = WebDriverWait(driver, 10)
+            element = wait.until(EC.presence_of_element_located((By.XPATH, "//input[@aria-label='Search query']")))
+            element.send_keys(keyword)
+            element.send_keys(Keys.ENTER)
+            time.sleep(3)
+            wait = WebDriverWait(driver, 20)
+            element = wait.until(EC.presence_of_element_located((By.XPATH, ".//span[contains(text(), 'Latest')]")))
+            element.click()
+
+            try:
+                # Define the URL for the user's timeline
+                # Find all the tweet elements on the page
+                data = []
+                tweet_ids = set()
+                last_position = driver.execute_script('return window.pageYOffset;')
+                scrolling = True
+
+                while scrolling:
+                    # Parse the HTML content of the page using BeautifulSoup
+                    soup = BeautifulSoup(driver.page_source, 'lxml')
+                    tweet_elements = soup.find_all('article', attrs={'data-testid': 'tweet'})
+                    print(len(tweet_elements))
+                    time.sleep(2)
+                    for tweet_element in tweet_elements:
+                        dom = etree.HTML(str(tweet_element))
+                        tweet = keyword_scraper(keyword, dom)
+                        if tweet:
+                            tweet_id = ''.join(tweet)
+                            if tweet_id not in tweet_ids:
+                                tweet_ids.add(tweet_id)
+                                data.append(tweet)
+                    scroll_attempt = 0
+                    if len(data) > 50:
+                        break
+                    while True:
+                        # check scroll position
+                        driver.execute_script('window.scrollTo(0, document.body.scrollHeight);')
+                        time.sleep(1)
+                        curr_position = driver.execute_script('return window.pageYOffset;')
+                        if last_position == curr_position:
+                            scroll_attempt=+1
+
+                            # end of scroll region
+                            if scroll_attempt >= 3:
+                                scrolling = False
+                                break
+                            else:
+                                time.sleep(2) # attempt to scroll again
+                        else:
+                            last_position = curr_position
+                            break
+
+                with open(csv_keyword, 'w', newline='', encoding='utf-8') as f:
+                    header = ['Fullname', 'Username', 'Timestamp', 'Tweets', 'Image', 'Hashtags', 'Mentions', 'Link', 'Number_of_replies', 'Number_of_retweets', 'Number_of_likes', 'Number_of_views']
+                    writer = csv.writer(f)
+                    writer.writerow(header)
+                    writer.writerows(data)
+
+            except Exception as e:
+                message = str(e)
+                error_log(message)
+                continue
+
+            
+
+
+
+            # csv_file1 = os.path.join(basedir, '../csv_files/raw_dump_') + username + ".csv"
+            # csv_file2 = os.path.join(basedir, '../csv_files/parent_tweet_') + username + ".csv"
+            # csv_file3 = os.path.join(basedir, '../csv_files/reply_of_') + username + ".csv"
+
+            # # Remove raw_dump, parent and reply csv files before scraping if they already exist
+            # try:
+            #     os.remove(csv_file1)
+            #     os.remove(csv_file2)
+            #     os.remove(csv_file3)
+            
+            # Exception handling
+            # Logg a warning message to log/WARNING.log
+            except Exception as e:
+                message = str(e)+' No Such File!'
+                warning_log(message)
+                print('No Such File!')
+            # tweet_scrapper(username, csv_file1)
+
+            # Execute filter_username, filter_replies and data_structure methods
+            try:
+                # filter_username(username, csv_file1, csv_timeline)
+                # filter_replies(username, csv_file1, csv_file3)
+                sleep(1)
+                data_structure(csv_keyword)
+            
+            # Exception handling
+            # Log error message to log/ERROR.log
+            except Exception as e:
+                message = str(e)
+                error_log(message)
+                # stylize(e, colored.fg("grey_46"))
+                continue
+            sleep(1)
 driver.close()
 '''out_file = open("file.json", "w", encoding='utf-8')
 
