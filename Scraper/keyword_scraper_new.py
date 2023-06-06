@@ -147,6 +147,31 @@ def keyword_scraper(keyword, dom):
         print(fullname)
         username = dom.xpath('.//div[@class="css-901oao css-1hf3ou5 r-14j79pv r-18u37iz r-37j5jr r-1wvb978 r-a023e6 r-16dba41 r-rjixqe r-bcqeeo r-qvutc0"]/span')[0].text
         print(username)
+        time.sleep(0.2)
+        try:
+            tweet_link = dom.xpath('.//div[@class="css-1dbjc4n r-18u37iz r-1q142lx"]/a')[0].attrib['href']
+            tweet_link = 'https://www.twitter.com'+tweet_link
+            tweet_id = tweet_link.split("/")[-1]
+            print(tweet_id)
+            print(type(tweet_id))
+            print(tweet_link)
+        except:
+            tweet_link = ''
+            tweet_id = ''
+            print("Sponsored Content")
+        try:
+            if driver.current_url=="https://twitter.com/%s" % main_username:
+                print('tweet_url '+driver.current_url)
+                conversation_id = tweet_id
+                print(conversation_id)
+                print(type(conversation_id))
+            else:
+                print('reply_url '+driver.current_url)
+                conversation_id = driver.current_url.split("/")[-1]
+                print(conversation_id)
+                print(type(conversation_id))
+        except Exception as e:
+            conversation_id = None
         try:
             post_date = dom.xpath('.//time')[0].attrib['datetime']
             print(post_date)
@@ -258,7 +283,7 @@ def keyword_scraper(keyword, dom):
     except:
         wait = WebDriverWait(driver, 1)
         element = wait.until(EC.presence_of_element_located((By.XPATH, '//div[@data-testid = "app-bar-close"]'))).click()
-    tweet = (fullname, username, post_date, tweet_text, json.dumps(list(image_link)), json.dumps(list(hashtags)), json.dumps(list(mentions)), json.dumps(list(external_links)), reply_count, retweet_count, likes_count, views_count)
+    tweet = (fullname, username, tweet_id, str(tweet_link), str(conversation_id), post_date, tweet_text, json.dumps(list(image_link)), json.dumps(list(hashtags)), json.dumps(list(mentions)), json.dumps(list(external_links)), reply_count, retweet_count, likes_count, views_count)
     return tweet
           
 

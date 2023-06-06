@@ -7,14 +7,16 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 import chromedriver_autoinstaller
 from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import StaleElementReferenceException
 import os
 import pandas as pd
 import time
 from sys import platform
 # from colored import stylize
-# import colored
+# import colored 
 from log import *
 import re
+from login import *
 import csv
 from lxml import etree
 import configparser
@@ -29,7 +31,8 @@ elements_file = os.path.join(basedir, '../Authentication/elements_iteration.ini'
 config.read(elements_file)
 web_elements = config['WebElements']
 iteration_number = config['IterationNumber']
-
+login()
+print('session cookie',driver.get_cookie('session'))
 """
 if platform == "linux" or platform == "linux2":
     chro_path = os.path.join(basedir, '../chromedriver/chromedriver')
@@ -37,17 +40,17 @@ elif platform == "win32":
     chro_path = os.path.join(basedir, '../chromedriver/chromedriver.exe')
     
 """
-chromedriver_autoinstaller.install()
-options = Options()
-options.headless = False
+# chromedriver_autoinstaller.install()
+# options = Options()
+# options.headless = False
 
-driver = webdriver.Chrome(options=options)
+# driver = webdriver.Chrome(options=options)
 data_set = []
 # print(search_page)
 # open("twitterpage.text","w").write(search_page.encode('utf-8'))
 print(web_elements.get('Fullname'))
 # Profile information scraper
-def profile_scraper(username, csv_file):
+def profile_scraper(username):
     '''
     :param username: This is the username from which the profile information is scraped from
     :param csv_file: This is the pre-initialized file that the user profile information is saved.
@@ -55,17 +58,30 @@ def profile_scraper(username, csv_file):
     This function takes username and csv_file as an argument and returns the profile information of a user in csv file format.
     '''
     try:
-        wait = WebDriverWait(driver, 5)
-        element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('UsernameNotFound'))))
-        UsernameNotFound = element.text
-        print(UsernameNotFound)
-        error_log('username '+ username +' not found!')
-        pass
+        try:
+            driver.execute_script("window.scrollTo(0, 0);")
+        except:
+            pass
+        try:    
+            wait = WebDriverWait(driver, 3)
+            element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('UsernameNotFound'))))
+            UsernameNotFound = element.text
+            print(UsernameNotFound)
+            error_log('username '+ username +' not found!')
+            profile.append(UsernameNotFound)
+
+        except:
+            wait = WebDriverWait(driver, )
+            element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('UsernameNotFound1'))))
+            UsernameNotFound1 = element.text
+            print(UsernameNotFound1)
+            error_log('username '+ username +' not found!')
+            profile.append(UsernameNotFound)
     except:
         try:
             wait = WebDriverWait(driver, 5)
             element = wait.until(EC.presence_of_element_located((By.XPATH, web_elements.get('Empty_element')))).click()
-            profile_scraper(username, csv_file) 
+            profile_scraper(username) 
             
         except:
             try:
@@ -141,33 +157,62 @@ def profile_scraper(username, csv_file):
                 Joined_date = None
                 print(Joined_date)
                 pass
-            
-
-        df = pd.DataFrame(
-        [[Fullname, UserName, Description, Tweets, No_Following, No_Followers, Profile_Picture, Joined_date]],
-        columns=['Fullname', 'UserName', 'Description', 'Tweets', 'Number of Followings', 'Number of Followers', 'Profile_Picture',
-                 'Joined_date'])
+            profile = (Fullname, UserName, Description, Tweets, No_Following, No_Followers, Profile_Picture, Joined_date)
+    
+    return profile
     
     #file = os.path.join(basedir, '../csv_files/')
 
     # Save the data on csv_profile
-        df.to_csv(csv_file)
+        
 
         
 data = []
-def scrape_user_timeline(username, dom):
+def scrape_user_timeline(main_username, dom):
     image_link = []
+    # dom.xpath('//div[@class="css-1dbjc4n r-1awozwy r-1hwvwag r-18kxxzh r-1b7u577"]')[0].click
     try:
+        wait = WebDriverWait(driver, 1)
+        element = element = driver.find_element_by_xpath("//div[@id='parent']")
+        No_Following = element.text
+        print(No_Following)
         fullname = dom.xpath('.//span[@class="css-901oao css-16my406 css-1hf3ou5 r-poiln3 r-bcqeeo r-qvutc0"]/span')[0].text
         print(fullname)
         username = dom.xpath('.//div[@class="css-901oao css-1hf3ou5 r-14j79pv r-18u37iz r-37j5jr r-1wvb978 r-a023e6 r-16dba41 r-rjixqe r-bcqeeo r-qvutc0"]/span')[0].text
         print(username)
+        time.sleep(0.2)
+        try:
+            tweet_link = dom.xpath('.//div[@class="css-1dbjc4n r-18u37iz r-1q142lx"]/a')[0].attrib['href']
+            tweet_link = 'https://www.twitter.com'+tweet_link
+            tweet_id = tweet_link.split("/")[-1]
+            print(tweet_id)
+            print(type(tweet_id))
+            print(tweet_link)
+        except:
+            tweet_link = ''
+            tweet_id = ''
+            print("Sponsored Content")
+        try:
+            if driver.current_url=="https://twitter.com/%s" % main_username:
+                print('tweet_url '+driver.current_url)
+                conversation_id = tweet_id
+                print(conversation_id)
+                print(type(conversation_id))
+            else:
+                print('reply_url '+driver.current_url)
+                conversation_id = driver.current_url.split("/")[-1]
+                print(conversation_id)
+                print(type(conversation_id))
+        except Exception as e:
+            conversation_id = None
         try:
             post_date = dom.xpath('.//time')[0].attrib['datetime']
             print(post_date)
         except:
             NoSuchElementException
-            post_date = ''
+            post_date = 'None'
+            print('Sponsored Content')
+
         # tweets = dom.xpath('.//div[@data-testid="tweetText"]')
         # tweet_text=''
         # for i in tweets:
@@ -182,26 +227,42 @@ def scrape_user_timeline(username, dom):
         mentions = []
         hashtags = []
         external_links = []
-
+        count_text = 0
+        count_hashtag = 0
+        count_mentions = 0
+        count_external_link = 0
         try:
-            for i in range(10):
-                time.sleep(0.1)
-                print(range(len(full_text)))
-                if all_text:
-                    text = all_text[i].text            
-                    tweet_text += text
-                if hashtag:
-                    text = hashtag[i].text 
-                    hashtags.append(text)          
-                    tweet_text += text
-                if mention:
-                    text = mention[i].text 
-                    mentions.append(text)             
-                    tweet_text += text
-                if external_link:
-                    text = external_link[i].text 
-                    external_links.append(text)             
-                    tweet_text += text
+            for i in range(20):
+                print('the first element is ',i)
+                time.sleep(0.2)
+                # print(range(len(full_text)))
+                for j in range(i):
+                    if all_text:
+                        j=count_text
+                        text = all_text[j].text            
+                        tweet_text += text
+                        count_text+=1
+                for j in range(i):
+                    if hashtag:
+                        j=count_hashtag
+                        text = hashtag[j].text 
+                        hashtags.append(str(text))          
+                        tweet_text += text
+                        count_hashtag+=1
+                for j in range(i):
+                    if mention:
+                        j=count_mentions
+                        text = mention[j].text 
+                        mentions.append(text)             
+                        tweet_text += text
+                        count_mentions+=1
+                for j in range(i):
+                    if external_link:
+                        j=count_external_link
+                        text = external_link[j].text 
+                        external_links.append(text)             
+                        tweet_text += text
+                        count_external_link+=1
             print(tweet_text)
         except:
             pass
@@ -273,7 +334,7 @@ def scrape_user_timeline(username, dom):
     except:
         wait = WebDriverWait(driver, 1)
         element = wait.until(EC.presence_of_element_located((By.XPATH, '//div[@data-testid = "app-bar-close"]'))).click()
-    tweet = (fullname, username, post_date, tweet_text, json.dumps(list(image_link)), json.dumps(list(hashtags)), json.dumps(list(mentions)), json.dumps(list(external_links)), reply_count, retweet_count, likes_count, views_count)
+    tweet = (fullname, username, tweet_id, tweet_link, conversation_id, post_date, tweet_text, json.dumps(list(image_link)), json.dumps(list(hashtags)), json.dumps(list(mentions)), json.dumps(list(external_links)), reply_count, retweet_count, likes_count, views_count)
     return tweet
           
 
