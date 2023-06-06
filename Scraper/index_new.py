@@ -234,7 +234,7 @@ with open(acc_name, "r", encoding='utf-8') as file:
                     'name': tweet[1], 'tweet_id': tweet[2], 'tweet_link': tweet[3], 'conversation_id': tweet[4], 'date':tweet[5], 'tweet': tweet[6], 'image_link': tweet[7], 'hashtags': tweet[8], 'mentions': tweet[9], 'link': tweet[10],
                     'replies_count': tweet[11],
                     'retweets_count': tweet[12], 'likes_count': tweet[13], 'views_count': tweet[14],
-                    'replies': tweet_data, 'reporting': {'is_reported': False, 'reporting_date': None, 'reported_by': None}})
+                    'replies': [], 'reporting': {'is_reported': False, 'reporting_date': None, 'reported_by': None}})
                         print(tweet[3])
                         # tweet_link.append(tweet[3])
                         # print(tweet_link)

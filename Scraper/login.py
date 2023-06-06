@@ -26,10 +26,10 @@ print(driver.current_url)
 print("Opening twitter account...")
 
 basedir = os.path.dirname(os.path.abspath(__file__))
-
+account_info = os.path.join(basedir, '../Authentication/Account.txt')
 #log in into an account
 def login():
-    f=open("../Authentication/Account.txt")
+    f=open(account_info)
 
     lines=f.readlines()
     username=lines[0]
@@ -41,17 +41,17 @@ def login():
             wait = WebDriverWait(driver, 5)
             element = wait.until(EC.presence_of_element_located((By.XPATH, "//input[@name='text']")))
             element.send_keys(username)
-            time.sleep(1)
+            time.sleep(3)
         except:
             wait = WebDriverWait(driver, 5)
             element = wait.until(EC.presence_of_element_located((By.XPATH, "//input[@name='username']")))
             element.send_keys(username)
-            time.sleep(1)
+            time.sleep(3)
         try:
             wait = WebDriverWait(driver, 5)
             element = wait.until(EC.presence_of_element_located((By.XPATH, "//input[@name='password']")))
             element.send_keys(password)
-            time.sleep(1)
+            time.sleep(3)
             if driver.get(url='https://twitter.com/home'):
                 pass
             else:
@@ -60,7 +60,7 @@ def login():
                     element = wait.until(EC.presence_of_element_located((By.XPATH, "//input[@name='text']")))
                     element.send_keys(phoneNo)
                     f.close()
-                    time.sleep(1)
+                    time.sleep(3)
                 except:
                     pass
         except:
@@ -70,17 +70,17 @@ def login():
                 wait = WebDriverWait(driver, 10)
                 element = wait.until(EC.presence_of_element_located((By.XPATH, "//input[@name='text']")))
                 element.send_keys(phoneNo)
-                time.sleep(1)
+                time.sleep(3)
 
                 wait = WebDriverWait(driver, 10)
                 element = wait.until(EC.presence_of_element_located((By.XPATH, "//input[@name='password']")))
                 element.send_keys(password)
-                time.sleep(1)
+                time.sleep(3)
             except:
                 wait = WebDriverWait(driver, 5)
                 element = wait.until(EC.presence_of_element_located((By.XPATH, "//input[@name='password']")))
                 element.send_keys(password)
-                time.sleep(1)
+                time.sleep(3)
         else:
             pass
 

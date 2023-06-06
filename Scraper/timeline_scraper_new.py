@@ -172,10 +172,6 @@ def scrape_user_timeline(main_username, dom):
     image_link = []
     # dom.xpath('//div[@class="css-1dbjc4n r-1awozwy r-1hwvwag r-18kxxzh r-1b7u577"]')[0].click
     try:
-        wait = WebDriverWait(driver, 1)
-        element = element = driver.find_element_by_xpath("//div[@id='parent']")
-        No_Following = element.text
-        print(No_Following)
         fullname = dom.xpath('.//span[@class="css-901oao css-16my406 css-1hf3ou5 r-poiln3 r-bcqeeo r-qvutc0"]/span')[0].text
         print(fullname)
         username = dom.xpath('.//div[@class="css-901oao css-1hf3ou5 r-14j79pv r-18u37iz r-37j5jr r-1wvb978 r-a023e6 r-16dba41 r-rjixqe r-bcqeeo r-qvutc0"]/span')[0].text
@@ -332,7 +328,7 @@ def scrape_user_timeline(main_username, dom):
             views_count = ''
         # tweets.append(tweet_text)
     except:
-        wait = WebDriverWait(driver, 1)
+        wait = WebDriverWait(driver, 5)
         element = wait.until(EC.presence_of_element_located((By.XPATH, '//div[@data-testid = "app-bar-close"]'))).click()
     tweet = (fullname, username, tweet_id, tweet_link, conversation_id, post_date, tweet_text, json.dumps(list(image_link)), json.dumps(list(hashtags)), json.dumps(list(mentions)), json.dumps(list(external_links)), reply_count, retweet_count, likes_count, views_count)
     return tweet
