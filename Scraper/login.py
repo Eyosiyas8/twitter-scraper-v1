@@ -16,7 +16,8 @@ from selenium.common.exceptions import NoSuchElementException
 
 chromedriver_autoinstaller.install()
 options = Options()
-options.headless = False
+options.add_argument('--headless')
+driver = webdriver.Chrome(options=options) 
 chro_path = os.environ.get('CHROME_PATH')
 driver = webdriver.Chrome(options=options)
 

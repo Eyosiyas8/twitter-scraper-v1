@@ -88,11 +88,11 @@ with open(acc_name, "r", encoding='utf-8') as file:
                                 tweet_ids.add(tweet_id)
                                 tweet_link = tweet[3]
                                 tweet_text = tweet[6]
-                                try:
-                                    tweet_data = scrape_replies(username, tweet_link, tweet_text)
-                                except Exception as e:
-                                    print(e)
-                                    error_log(e)
+                                # try:
+                                #     tweet_data = scrape_replies(username, tweet_link, tweet_text)
+                                # except Exception as e:
+                                #     print(e)
+                                #     error_log(e)
                                 if tweet[5] == 'None':
                                     continue
                                 else:
@@ -109,7 +109,7 @@ with open(acc_name, "r", encoding='utf-8') as file:
 
                     # print(tweet_data)
                     scroll_attempt = 0
-                    if len(data) >= 0 and len(data) < 5:
+                    if len(data) >= 0 and len(data) < 30:
                         pass
                     else:
                         break
@@ -222,10 +222,11 @@ with open(acc_name, "r", encoding='utf-8') as file:
                             tweet_ids.add(tweet_id)
                             tweet_link = tweet[3]
                             tweet_text = tweet[6]
-                            try:
-                                tweet_data = scrape_replies(username, tweet_link, tweet_text)
-                            except Exception as e:
-                                print(e)
+                            # try:
+                            #     tweet_data = scrape_replies(username, tweet_link, tweet_text)
+                            # except Exception as e:
+                            #     print(e)
+                            #     error_log(e)
                             if tweet[5] == 'None':
                                 continue
                             else:
@@ -241,7 +242,7 @@ with open(acc_name, "r", encoding='utf-8') as file:
                     
 
                 # print(tweet_data)
-                if len(data) >= 0 and len(data) < 2:
+                if len(data) >= 0 and len(data) < 30:
                     pass
                 else:
                     break

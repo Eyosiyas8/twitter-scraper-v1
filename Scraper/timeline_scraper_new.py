@@ -229,7 +229,7 @@ def scrape_user_timeline(main_username, dom):
         count_external_link = 0
         try:
             for i in range(20):
-                print('the first element is ',i)
+                # print('the first element is ',i)
                 time.sleep(0.2)
                 # print(range(len(full_text)))
                 for j in range(i):

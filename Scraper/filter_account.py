@@ -39,6 +39,7 @@ with open(acc_name, "r", encoding='utf-8') as file:
     print("current session is {}".format(driver.session_id))
 
     login()
+    driver.get('https://twitter.com/explore')
 
     for j in sys.argv[1:]:
         phrases.append(j)
@@ -69,11 +70,10 @@ with open(acc_name, "r", encoding='utf-8') as file:
             try:
                 data = []
                 tweet_ids = set()
-                # last_position = driver.execute_script('return window.pageYOffset;')
+                last_position = driver.execute_script('return window.pageYOffset;')
                 scrolling = True
                 x=0
                 y=800
-                last_position = driver.execute_script('return window.pageYOffset;')
                 while scrolling:
                     # wait = WebDriverWait(driver, 1)
                     # element = wait.until(EC.presence_of_all_elements_located((By.XPATH, '//article[@data-testid = "tweet"]')))
@@ -82,11 +82,8 @@ with open(acc_name, "r", encoding='utf-8') as file:
                     # Parse the HTML content of the page using BeautifulSoup
                     soup = BeautifulSoup(driver.page_source, 'html.parser')
                     acc_elements = soup.find_all('div', attrs={'data-testid': 'cellInnerDiv'})
-                    time.sleep(5)
                     print(len(acc_elements))
-                    if len(acc_elements) == 0:
-                        error_log('Searched phrase doesn\'t exist')
-                        break
+                    time.sleep(5)
                     for acc_element in acc_elements[:-1]:
                         dom = etree.HTML(str(acc_element))
                         account_info = acc_info(dom)
@@ -94,12 +91,7 @@ with open(acc_name, "r", encoding='utf-8') as file:
                             tweet_id = ''.join(account_info)
                             if tweet_id not in tweet_ids:
                                 tweet_ids.add(tweet_id)
-                                data.append({
-                                    'Fullname': account_info[0],
-                                    'Username': account_info[1],
-                                    'Description': account_info[2],
-                                    'Profile_Picture': account_info[3],
-                                })
+                                data.append(account_info)
                     scroll_attempt = 0
                     if len(data) >= 0 and len(data) < 5:
                         pass
@@ -220,7 +212,7 @@ with open(acc_name, "r", encoding='utf-8') as file:
             try:
                 data = []
                 tweet_ids = set()
-                # last_position = driver.execute_script('return window.pageYOffset;')
+                last_position = driver.execute_script('return window.pageYOffset;')
                 scrolling = True
                 x=0
                 y=800
@@ -234,7 +226,7 @@ with open(acc_name, "r", encoding='utf-8') as file:
                     acc_elements = soup.find_all('div', attrs={'data-testid': 'cellInnerDiv'})
                     print(len(acc_elements))
                     time.sleep(5)
-                    for acc_element in acc_elements:
+                    for acc_element in acc_elements[:-1]:
                         dom = etree.HTML(str(acc_element))
                         account_info = acc_info(dom)
                         if account_info and account_info[2] != None or account_info[3] != None:
@@ -249,11 +241,32 @@ with open(acc_name, "r", encoding='utf-8') as file:
                         break
                     # while True:
                         # check scroll position
-                    time.sleep(1)
-                    driver.execute_script('window.scrollTo({0}, {1});'.format(x, y))
-                    x+=1000
-                    y+=1000
-                    time.sleep(1)
+                    while True:
+                        driver.execute_script('window.scrollTo({0}, {1});'.format(x, y))
+                        time.sleep(1)
+                        x+=1000
+                        y+=1000
+                        curr_position = driver.execute_script('return window.pageYOffset;')
+                        print('current position ',curr_position)
+                        if last_position == curr_position:
+                            scroll_attempt+=1
+
+                            # end of scroll region
+                            if scroll_attempt >= 3:
+                                scrolling = False
+                                break
+                            else:
+                                time.sleep(2) # attempt to scroll again
+                        else:
+                            last_position = curr_position
+                            break
+                if data == []:
+                    pass
+                else:
+                    print('this is account info ', account_info)
+                    csv_row1 = []
+                    csv_row1.append({'Date_of_Scraping': datetime.today(), 'Search Phrase': phrase, 'Account Info': data})
+                    collection.insert_many(csv_row1)
                         # curr_position = driver.execute_script('return window.pageYOffset;')
                         # if last_position == curr_position:
                         #     scroll_attempt=+1
@@ -311,4 +324,8 @@ with open(acc_name, "r", encoding='utf-8') as file:
             #     continue
             sleep(1)
 driver.close()
+
+
+
+
 
